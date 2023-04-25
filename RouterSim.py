@@ -2,6 +2,7 @@ import simpy
 import random
 import math
 
+#commet
 class Node:
     def __init__(self, env, node_id, x, y, network):
         self.env = env
