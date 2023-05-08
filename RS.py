@@ -1,3 +1,7 @@
+"""
+Implementation of network simulation using the RPL protocol
+"""
+
 import simpy
 import math
 import random
@@ -116,10 +120,15 @@ class Node:
 
     
 
-# Example usage
 if __name__ == "__main__":
+    """
+    Test cases
+    """
+    #create environment and network
     env = simpy.Environment()
     network = Network(env)
+
+    #Test case 1
     node1 = network.add_node(1, (0, 0))
     node2 = network.add_node(2, (1, 1))
     node3 = network.add_node(3, (4, 4))
