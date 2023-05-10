@@ -140,11 +140,11 @@ if __name__ == "__main__":
 
     node1.rank = 0  # Set root node
 
-    I_min = 1  # Minimum interval for Trickle algorithm
-    I_max = 8  # Maximum interval for Trickle algorithm
-    k = 1  # Redundancy constant
+    I_min = 1  #minimum interval for trickle algorithm
+    I_max = 8  #maximum interval for trickle algorithm
+    k = 1      #redundancy constant
 
-    # Start the Trickle algorithm for each node
+    #start the Trickle algorithm for each node
     for node in network.nodes:
         env.process(node.trickle(I_min, I_max, k))
 
