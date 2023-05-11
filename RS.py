@@ -133,13 +133,43 @@ if __name__ == "__main__":
     node2 = network.add_node(2, (1, 1))
     node3 = network.add_node(3, (4, 4))
 
+    # neighbor discovery Test 
+    print()
+    print("Test for neighbor discovery")
     discovery_radius = 5
 
     for node in network.nodes:
         node.discover_neighbors(network, discovery_radius)
 
+    for node in network.nodes:
+        print(f"Node {node.node_id} neighbors: {[n.node_id for n in node.neighbors]}")
+    
+    #DIO message test to the DODAG formation
+    print()
+    print("Test DIO")
     node1.rank = 0  # Set root node
+    node1.send_dio()
 
+    for node in network.nodes:
+        print(f"Node {node.node_id} rank: {node.rank}")
+        print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
+    
+    #Dis test
+    print()
+    print("Test dis")
+
+    node4 = network.add_node(4, (6, 6))
+    for node in network.nodes:
+        node.discover_neighbors(network, discovery_radius)
+
+    node4.send_dis()  # Node 3 sends a DIS message to its neighbors
+
+    for node in network.nodes:
+        print(f"Node {node.node_id} rank: {node.rank}")
+        print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
+
+    print()
+    print("Test Trickle algorithm and addresing")
     I_min = 1  # Minimum interval for Trickle algorithm
     I_max = 8  # Maximum interval for Trickle algorithm
     k = 1  # Redundancy constant
@@ -157,6 +187,9 @@ if __name__ == "__main__":
         print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
         print(f"Node {node.node_id} address: {node.address}")
 
+    #test dao
+    print()
+    print("Test Dao")
     for node in network.nodes:
         if node.rank > 0:
             node.send_dao()
@@ -164,6 +197,10 @@ if __name__ == "__main__":
     for node in network.nodes:
         print(f"Node {node.node_id} children and prefixes: {node.children}")
 
+
+    #test dao
+    print()
+    print("Test Repair")
     # Simulate a problem at Node 2
     node2.repair()
 
