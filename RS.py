@@ -174,7 +174,7 @@ if __name__ == "__main__":
     I_max = 8  # Maximum interval for Trickle algorithm
     k = 1  # Redundancy constant
 
-    # Start the Trickle algorithm for each node
+    #start the Trickle algorithm for each node
     for node in network.nodes:
         env.process(node.trickle(I_min, I_max, k))
 
