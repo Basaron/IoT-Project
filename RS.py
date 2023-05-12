@@ -6,6 +6,8 @@ import simpy
 import math
 import random
 
+msgCount = 0
+
 class Network:
     """
     Network class
@@ -60,6 +62,7 @@ class DAO_Message:
 
 
 class Node:
+    
     """
     Node class
     """
@@ -97,10 +100,12 @@ class Node:
                 self.add_neighbor(node)
 
     def send_dio(self):
+        global msgCount
         for neighbor in self.neighbors:
             rank = self.rank + self.distance(neighbor)
             dio_msg = DIO_Message(self, rank)
             neighbor.process_dio(dio_msg)
+            msgCount += 1
 
     def process_dio(self, dio_msg):
         if dio_msg.rank < self.rank:
@@ -110,25 +115,32 @@ class Node:
         self.dio_count += 1
 
     def send_dis(self):
+        global msgCount
         dis_msg = DIS_Message(self)
         for neighbor in self.neighbors:
             neighbor.process_dis(dis_msg)
+            msgCount += 1
 
     def process_dis(self, dis_msg):
         self.send_dio_to(dis_msg.sender)
 
     def send_dio_to(self, target_node):
+        global msgCount
         rank = self.rank + self.distance(target_node)
         dio_msg = DIO_Message(self, rank)
         target_node.process_dio(dio_msg)
+        msgCount += 1
 
     def send_dao(self):
+        global msgCount
         if self.parent:
             dao_msg = DAO_Message(self, self.address)
             self.parent.process_dao(dao_msg)
+            msgCount += 1
 
     def process_dao(self, dao_msg):
-        self.children.append((dao_msg.sender, dao_msg.prefix))
+        if not ((dao_msg.sender.node_id, dao_msg.prefix) in self.children):
+            self.children.append((dao_msg.sender.node_id, dao_msg.prefix))
         if self.parent:
             self.send_dao()  # Forward DAO message up the DODAG
     
@@ -153,53 +165,63 @@ class Node:
 if __name__ == "__main__":
     """
     Test cases
-    """
+    """    
     #create environment and network
     env = simpy.Environment()
     network = Network(env)
 
     #Test case 1
     node1 = network.add_node(1, (0, 0))
-    node2 = network.add_node(2, (1, 1))
-    node3 = network.add_node(3, (4, 4))
+    node2 = network.add_node(2, (1, 0))
+    node3 = network.add_node(3, (0, 1))
+    node4 = network.add_node(4, (1, 1))
+    node5 = network.add_node(5, (1, 2))
+    node6 = network.add_node(6, (2, 1))
+    node8 = network.add_node(8, (0, 2))
 
     # neighbor discovery Test 
     print()
     print("Test for neighbor discovery")
-    discovery_radius = 5
+    discovery_radius = 1
 
     for node in network.nodes:
         node.discover_neighbors(network, discovery_radius)
 
     for node in network.nodes:
         print(f"Node {node.node_id} neighbors: {[n.node_id for n in node.neighbors]}")
-    
+        
     #DIO message test to the DODAG formation
     print()
     print("Test DIO")
+    msgCount = 0
     node1.rank = 0  # Set root node
     node1.send_dio()
 
     for node in network.nodes:
         print(f"Node {node.node_id} rank: {node.rank}")
         print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
-    
+    print(msgCount)
+
     #Dis test
     print()
     print("Test dis")
+    msgCount = 0
 
-    node4 = network.add_node(4, (6, 6))
+    node7 = network.add_node(7, (3, 1))
     for node in network.nodes:
         node.discover_neighbors(network, discovery_radius)
 
-    node4.send_dis()  # Node 3 sends a DIS message to its neighbors
+    node7.send_dis()  # Node 3 sends a DIS message to its neighbors
 
     for node in network.nodes:
         print(f"Node {node.node_id} rank: {node.rank}")
         print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
+    print(msgCount)
 
     print()
     print("Test Trickle algorithm and addresing")
+    msgCount = 0
+
     I_min = 1  # Minimum interval for Trickle algorithm
     I_max = 8  # Maximum interval for Trickle algorithm
     k = 1  # Redundancy constant
@@ -216,21 +238,26 @@ if __name__ == "__main__":
         print(f"Node {node.node_id} rank: {node.rank}")
         print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
         print(f"Node {node.node_id} address: {node.address}")
+    print(msgCount)
 
     #test dao
     print()
     print("Test Dao")
+    msgCount = 0
+
     for node in network.nodes:
         if node.rank > 0:
             node.send_dao()
 
     for node in network.nodes:
         print(f"Node {node.node_id} children and prefixes: {node.children}")
+    print(msgCount)
 
-
-    #test dao
+    #test Repair
     print()
     print("Test Repair")
+    msgCount = 0
+
     # Simulate a problem at Node 2
     node2.repair()
 
@@ -241,3 +268,5 @@ if __name__ == "__main__":
     for node in network.nodes:
         print(f"Node {node.node_id} rank: {node.rank}")
         print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
+
+    print(msgCount)
