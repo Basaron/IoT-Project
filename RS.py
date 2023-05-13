@@ -1,12 +1,16 @@
 """
 Implementation of network simulation using the RPL protocol
 """
-
 import simpy
 import math
 import random
+import matplotlib.pyplot as plt
+import imageio
+import os
+import numpy as np
 
 msgCount = 0
+makeGIF = True
 
 #-----------------NETWORK---------------------#
 class Network:
@@ -16,12 +20,14 @@ class Network:
     def __init__(self, env):
         self.env = env
         self.nodes = []     #list of nodes in the network
+        self.images = []
 
     #add node to the network 
     def add_node(self, node_id, position):
-        new_node = Node(self.env, node_id, position) #information: node id and position 
-        self.nodes.append(new_node)
-        return new_node
+        node = Node(self.env, self, node_id, position)#information: node id and position 
+        self.nodes.append(node)
+        self.visualize(f'Added node {node_id}')
+        return node
 
     #get node from the network
     def get_node(self, node_id):
@@ -29,6 +35,23 @@ class Network:
             if node.node_id == node_id:
                 return node
         return None
+    
+    def visualize(self, title):
+        global makeGIF
+        if makeGIF:
+            plt.figure(figsize=(6,6))
+            plt.xlim(-1, 5)
+            plt.ylim(-1, 5)
+            for node in self.nodes:
+                color = 'g' if node.rank == 0 else 'r' if node.rank > 5 else 'b'
+                plt.scatter(*node.position, c=color)
+                if node.parent:
+                    plt.plot(*zip(node.position, node.parent.position), 'k-')
+            plt.title(title)
+            filename = f'output_{len(self.images)}.png'
+            plt.savefig(filename)
+            self.images.append(imageio.imread(filename))
+            plt.close()
 
 #-----------------CONTROL MESSAGES---------------------#
 class DIO_Message:
@@ -71,8 +94,9 @@ class Node:
     """
     Node class
     """
-    def __init__(self, env, node_id, position):
+    def __init__(self, env, network, node_id, position):
         self.env = env
+        self.network = network
         self.node_id = node_id
         self.position = position
         self.neighbors = []
@@ -106,6 +130,7 @@ class Node:
         for node in network.nodes:
             if node != self and self.distance(node) <= max_distance:
                 self.add_neighbor(node)
+        self.network.visualize(f'Node {self.node_id} discovered neighbors')
 
 
     """
@@ -120,6 +145,7 @@ class Node:
             dio_msg = DIO_Message(self, rank)
             neighbor.process_dio(dio_msg)               #all neighbors process the dio message
             msgCount += 1
+        self.network.visualize(f'Node {self.node_id} sent DIO message')
 
     #process dio message
     def process_dio(self, dio_msg):
@@ -128,6 +154,7 @@ class Node:
             self.parent = dio_msg.sender                #parent is the node that sent the dio message
             self.send_dio()                             #keep sending dio messages to neighbors until no candidate parents are found
         self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
+        self.network.visualize(f'Node {self.node_id} processed DAO message')
 
     #send dio message to specific node
     def send_dio_to(self, target_node):
@@ -160,6 +187,7 @@ class Node:
             dao_msg = DAO_Message(self, self.address)       
             self.parent.process_dao(dao_msg)
             msgCount += 1
+        #self.network.visualize(f'Node {self.node_id} sent DAO message')
 
     #process dao messages
     def process_dao(self, dao_msg):
@@ -178,12 +206,13 @@ class Node:
     def repair(self):
         self.rank += 10  # Increase rank to initiate local repair
         self.send_dio()  # Broadcast updated DIO message
+        #self.network.visualize(f'Node {self.node_id} initiated local repair')
 
     #trickle algorithm
     def trickle(self, I_min, I_max, k):
         I = I_min                               #minimum interval
         t = I / 2 + random.uniform(0, I / 2)    #determine random time between I_min/2 and I_min 
-
+        self.dio_count = 0
         #keep sending dis messages until I_max is reached: If max is reached then the least energy is used 
         while I <= I_max:
             yield self.env.timeout(t)       #wait for t time units i.e. node is idle/listening 
@@ -195,7 +224,6 @@ class Node:
             I *= 2
             t = I / 2 + random.uniform(0, I / 2)
 
-    
 
 #-----------------TEST CASES---------------------#
 if __name__ == "__main__":
@@ -256,6 +284,7 @@ if __name__ == "__main__":
     print("Number of messages: ", msgCount)
 
     #----------------------Test: Trickle algorithm and addresing----------------------
+    makeGIF = False
     print("\nTest Trickle algorithm and addresing")
     msgCount = 0
 
@@ -313,3 +342,9 @@ if __name__ == "__main__":
     - "Lossy" messages
     - More "real world" simulation
     """
+    # Create the GIF
+    imageio.mimsave('output.gif', network.images)
+
+    # Remove the individual images after creating the GIF
+    for i in range(len(network.images)):
+        os.remove(f'output_{i}.png')
