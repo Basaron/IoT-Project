@@ -216,7 +216,7 @@ if __name__ == "__main__":
     node6 = network.add_node(6, (2, 1))
     node8 = network.add_node(8, (0, 2))
 
-    #----------------------Test: neighbor discovery----------------------
+    #----------------------Test: Neighbor discovery----------------------
     print("\nTest for neighbor discovery")
     
     discovery_radius = 1
