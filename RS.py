@@ -36,6 +36,11 @@ class Network:
                 return node
         return None
     
+    def start_simulation_dio(self, simulation_time):
+        # create a process for each node to send a DIO message
+        self.env.process(self.nodes[0].send_dio())
+        self.env.run(until=simulation_time)
+    
     def visualize(self, title, node_id_sender, node_reciver, send_msg):
         global makeGIF
         if makeGIF:
@@ -117,6 +122,7 @@ class Node:
         self.dio_count = 0
         self.address = f"aaaa::{node_id}"
         self.children = []
+        self.send_delay = 1
 
     """
     Functions 
@@ -155,17 +161,17 @@ class Node:
             rank = self.rank + self.distance(neighbor)  
             dio_msg = DIO_Message(self, rank)
             self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id}', self.node_id, neighbor.node_id, True)
-            neighbor.process_dio(dio_msg)               #all neighbors process the dio message
+            neighbor.process_dio(dio_msg)                 #all neighbors process the dio message
             msgCount += 1
-            
+        yield self.env.timeout(self.send_delay)
 
     #process dio message
     def process_dio(self, dio_msg):
-        if dio_msg.rank < self.rank:                    #rank rule in RPL: node's rank must be greater than its parent's rank 
+        if dio_msg.rank < self.rank:                     #rank rule in RPL: node's rank must be greater than its parent's rank 
             self.rank = dio_msg.rank                    
             self.parent = dio_msg.sender 
             self.network.visualize(f'Node {self.node_id} processed DIO message from {dio_msg.sender.node_id}', self.node_id, dio_msg.sender.node_id, False)               #parent is the node that sent the dio message
-            self.send_dio()                             #keep sending dio messages to neighbors until no candidate parents are found
+            self.env.process(self.send_dio())           #keep sending dio messages to neighbors until no candidate parents are found
         self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
         
 
@@ -272,12 +278,8 @@ if __name__ == "__main__":
     print("\nTest DIO")
     msgCount = 0
     node1.rank = 0             #set root node
-    node1.send_dio()           #send DIO message to all neighbors from root 
 
-    #env.process(node1.send_dio())
-
-    #sim_duration = 1000                                #run the simulation for 20 time units
-    #env.run(until=sim_duration)
+    network.start_simulation_dio(100)
 
     for node in network.nodes:
         print(f"Node {node.node_id} rank: {node.rank}")
