@@ -48,11 +48,10 @@ def make_dodag(network):
             os.remove(f'output_{i}.png')
 
 
-
 #-----------------SIMULATION---------------------#
 if __name__ == "__main__":
     #make network
-    network = test_auto_configure_network(10, 5, 20)
+    network = test_auto_configure_network(8, 5, 10)
 
     #make dodag 
     make_dodag(network)

@@ -13,9 +13,10 @@ class Node:
     """
     Node class
     """
-    def __init__(self, env, node_id, position):
+    def __init__(self, env, network, node_id, position):
         self.env = env
         self.node_id = node_id
+        self.network = network
         self.position = position
         self.neighbors = []
         self.rank = float('inf')  # Initially set to infinity
@@ -49,7 +50,6 @@ class Node:
         for node in network.nodes:
             if node != self and self.distance(node) <= max_distance:
                 self.add_neighbor(node)
-        
         #self.network.visualize(f'Node {self.node_id} discovered neighbors', self.node_id)
 
 
@@ -64,6 +64,7 @@ class Node:
         for neighbor in self.neighbors:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
             rank = self.rank + self.distance(neighbor)  
             dio_msg = DIO_Message(self, rank)
+            self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id}', self.node_id, neighbor.node_id, True)
             neighbor.process_dio(dio_msg)               #all neighbors process the dio message
             msgCount += 1
 
@@ -74,7 +75,8 @@ class Node:
         if dio_msg.rank < self.rank:                    #rank rule in RPL: node's rank must be greater than its parent's rank 
             self.rank = dio_msg.rank                    
             self.parent = dio_msg.sender                #parent is the node that sent the dio message
-            self.send_dio()                             #keep sending dio messages to neighbors until no candidate parents are found
+            self.network.visualize(f'Node {self.node_id} processed DIO message from {dio_msg.sender.node_id}', self.node_id, dio_msg.sender.node_id, False)               #parent is the node that sent the dio message
+            self.env.process(self.send_dio())                             #keep sending dio messages to neighbors until no candidate parents are found
         self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
 
     #send dio message to specific node
