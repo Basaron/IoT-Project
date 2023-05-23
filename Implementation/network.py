@@ -46,7 +46,10 @@ class Network:
     
 
     def start_simulation_dio(self, simulation_time):
-        # create a process for each node to send a DIO message
+        #set root node rank 
+        self.nodes[0].rank = 0
+
+        # create a process for each node to send a DIO message    
         self.env.process(self.nodes[0].send_dio())
         self.env.run(until=simulation_time)
     

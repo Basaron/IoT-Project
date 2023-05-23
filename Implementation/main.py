@@ -46,7 +46,7 @@ def make_dodag(network):
 #-----------------SIMULATION---------------------#
 if __name__ == "__main__":
     #make network
-    network = test_auto_configure_network(8, 3, 10)
+    network = test_auto_configure_network(10, 3, 10)
 
     #make dodag 
     make_dodag(network)
