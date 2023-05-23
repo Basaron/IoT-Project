@@ -45,9 +45,9 @@ class Network:
             node.discover_neighbors(self, max_distance)  # Node discovers its neighbors based on max distance
     
 
-    def start_simulation_dio(self, simulation_time, root_node_id):
+    def start_simulation_dio(self, simulation_time):
         # create a process for each node to send a DIO message
-        self.env.process(self.nodes[root_node_id].send_dio())
+        self.env.process(self.nodes[0].send_dio())
         self.env.run(until=simulation_time)
     
 

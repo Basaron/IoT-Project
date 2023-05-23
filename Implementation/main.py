@@ -28,13 +28,8 @@ def test_auto_configure_network(max_nodes, max_distance, area_size):
 #make a dodag from network 
 def make_dodag(network):
         print("\n------------------------------Creation of DODAG------------------------------")
-        #set random root node from array of nodes
-        root_node = random.choice(network.nodes)
-        root_node.rank = 0
-        print(f"Root node is {root_node.node_id} with position {root_node.position}\n")
-
         #start simulation 
-        network.start_simulation_dio(100, root_node.node_id)
+        network.start_simulation_dio(100)
         
         #printing the rank and parent of each node
         for node in network.nodes:
@@ -51,7 +46,7 @@ def make_dodag(network):
 #-----------------SIMULATION---------------------#
 if __name__ == "__main__":
     #make network
-    network = test_auto_configure_network(8, 5, 10)
+    network = test_auto_configure_network(8, 3, 10)
 
     #make dodag 
     make_dodag(network)
