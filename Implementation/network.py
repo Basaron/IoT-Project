@@ -2,8 +2,6 @@ import random
 from node import Node
 import matplotlib.pyplot as plt
 import imageio
-import os
-import numpy as np
 
 #-----------------NETWORK---------------------#
 class Network:
@@ -13,6 +11,7 @@ class Network:
     def __init__(self, env):
         self.env = env
         self.nodes = []     #list of nodes in the network
+        self.images = []    #list of images for GIF
 
     #add node to the network 
     def add_node(self, node_id, position):
@@ -27,6 +26,10 @@ class Network:
                 return node
         return None
     
+
+    """
+    Simulation functions
+    """
     #auto-configure network with randomly placed nodes
     def auto_configure(self, max_nodes, max_distance, area_size):
         
@@ -38,8 +41,14 @@ class Network:
         #discovering neighbors for each node
         for node in self.nodes:
             node.discover_neighbors(self, max_distance)  # Node discovers its neighbors based on max distance
-
     
+
+    def start_simulation_dio(self, simulation_time, root_node_id):
+        # create a process for each node to send a DIO message
+        self.env.process(self.nodes[root_node_id].send_dio())
+        self.env.run(until=simulation_time)
+    
+
     def visualize(self, title, node_id_sender, node_reciver, send_msg):
         global makeGIF
 

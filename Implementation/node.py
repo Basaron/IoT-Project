@@ -23,6 +23,7 @@ class Node:
         self.dio_count = 0
         self.address = f"aaaa::{node_id}"
         self.children = []
+        self.send_delay = 1
 
     """
     Functions 
@@ -48,6 +49,9 @@ class Node:
         for node in network.nodes:
             if node != self and self.distance(node) <= max_distance:
                 self.add_neighbor(node)
+        
+        #self.network.visualize(f'Node {self.node_id} discovered neighbors', self.node_id)
+
 
 
     """
@@ -63,6 +67,8 @@ class Node:
             neighbor.process_dio(dio_msg)               #all neighbors process the dio message
             msgCount += 1
 
+        yield self.env.timeout(self.send_delay)                       #wait for 1 second before sending another dio message
+        
     #process dio message
     def process_dio(self, dio_msg):
         if dio_msg.rank < self.rank:                    #rank rule in RPL: node's rank must be greater than its parent's rank 
@@ -101,6 +107,9 @@ class Node:
             dao_msg = DAO_Message(self, self.address)       
             self.parent.process_dao(dao_msg)
             msgCount += 1
+        
+        #self.network.visualize(f'Node {self.node_id} sent DAO message')
+
 
     #process dao messages
     def process_dao(self, dao_msg):
