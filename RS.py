@@ -43,7 +43,7 @@ class Network:
             plt.xlim(-1, 5)
             plt.ylim(-1, 5)
             for node in self.nodes:
-                color = 'g' if node.rank == 0 else 'r' if node.rank > 5 else 'b'
+                color = 'g' if node.rank == 0 else 'r' if node.rank > 50 else 'b'
                 plt.scatter(*node.position, c=color)
                 if node.parent:
                     plt.plot(*zip(node.position, node.parent.position), 'k-')
@@ -343,7 +343,7 @@ if __name__ == "__main__":
     - More "real world" simulation
     """
     # Create the GIF
-    imageio.mimsave('output.gif', network.images)
+    imageio.mimsave('output.gif', network.images, loop = 1)
 
     # Remove the individual images after creating the GIF
     for i in range(len(network.images)):
