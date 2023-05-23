@@ -26,7 +26,7 @@ class Network:
     def add_node(self, node_id, position):
         node = Node(self.env, self, node_id, position)#information: node id and position 
         self.nodes.append(node)
-        self.visualize(f'Added node {node_id}')
+        #self.visualize(f'Added node {node_id}')
         return node
 
     #get node from the network
@@ -36,7 +36,7 @@ class Network:
                 return node
         return None
     
-    def visualize(self, title):
+    def visualize(self, title, node_id_sender, node_reciver, send_msg):
         global makeGIF
         if makeGIF:
             plt.figure(figsize=(6,6))
@@ -44,13 +44,25 @@ class Network:
             plt.ylim(-1, 5)
             for node in self.nodes:
                 color = 'g' if node.rank == 0 else 'r' if node.rank > 50 else 'b'
-                plt.scatter(*node.position, c=color)
+                plt.scatter(*node.position, s=500, c=color, zorder=3)  # Increase size by setting s
+                plt.text(node.position[0], node.position[1], str(node.node_id), color='white', ha='center', va='center')  # Add text
                 if node.parent:
-                    plt.plot(*zip(node.position, node.parent.position), 'k-')
+                    plt.plot(*zip(node.position, node.parent.position), 'k-',zorder=1)
+
+            if send_msg:
+                dx = self.get_node(node_reciver).position[0] - self.get_node(node_id_sender).position[0]  # calculate difference in x 
+                dy = self.get_node(node_reciver).position[1] - self.get_node(node_id_sender).position[1]  # calculate difference in y
+                plt.arrow(self.get_node(node_id_sender).position[0], self.get_node(node_id_sender).position[1], dx*0.8, dy*0.8, zorder=2, color='g', 
+                length_includes_head=True, head_width=0.2, head_length=0.3)
+                #plt.plot(*zip(self.get_node(node_id_sender).position, self.get_node(node_reciver).position), color='g')
+
+
+
+
             plt.title(title)
             filename = f'output_{len(self.images)}.png'
             plt.savefig(filename)
-            self.images.append(imageio.imread(filename))
+            self.images.append(imageio.v2.imread(filename))
             plt.close()
 
 #-----------------CONTROL MESSAGES---------------------#
@@ -130,7 +142,7 @@ class Node:
         for node in network.nodes:
             if node != self and self.distance(node) <= max_distance:
                 self.add_neighbor(node)
-        self.network.visualize(f'Node {self.node_id} discovered neighbors')
+        #self.network.visualize(f'Node {self.node_id} discovered neighbors', self.node_id)
 
 
     """
@@ -139,22 +151,23 @@ class Node:
     #send dio messages to all neighbors
     def send_dio(self):
         global msgCount                                 #global variable to count the number of messages sent        
-       
         for neighbor in self.neighbors:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
             rank = self.rank + self.distance(neighbor)  
             dio_msg = DIO_Message(self, rank)
+            self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id}', self.node_id, neighbor.node_id, True)
             neighbor.process_dio(dio_msg)               #all neighbors process the dio message
             msgCount += 1
-        self.network.visualize(f'Node {self.node_id} sent DIO message')
+            
 
     #process dio message
     def process_dio(self, dio_msg):
         if dio_msg.rank < self.rank:                    #rank rule in RPL: node's rank must be greater than its parent's rank 
             self.rank = dio_msg.rank                    
-            self.parent = dio_msg.sender                #parent is the node that sent the dio message
+            self.parent = dio_msg.sender 
+            self.network.visualize(f'Node {self.node_id} processed DIO message from {dio_msg.sender.node_id}', self.node_id, dio_msg.sender.node_id, False)               #parent is the node that sent the dio message
             self.send_dio()                             #keep sending dio messages to neighbors until no candidate parents are found
         self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
-        self.network.visualize(f'Node {self.node_id} processed DAO message')
+        
 
     #send dio message to specific node
     def send_dio_to(self, target_node):
@@ -261,6 +274,11 @@ if __name__ == "__main__":
     node1.rank = 0             #set root node
     node1.send_dio()           #send DIO message to all neighbors from root 
 
+    #env.process(node1.send_dio())
+
+    #sim_duration = 1000                                #run the simulation for 20 time units
+    #env.run(until=sim_duration)
+
     for node in network.nodes:
         print(f"Node {node.node_id} rank: {node.rank}")
         print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
@@ -282,7 +300,7 @@ if __name__ == "__main__":
         print(f"Node {node.node_id} rank: {node.rank}")
         print(f"Node {node.node_id} parent: {node.parent.node_id if node.parent else None}")
     print("Number of messages: ", msgCount)
-
+    """
     #----------------------Test: Trickle algorithm and addresing----------------------
     makeGIF = False
     print("\nTest Trickle algorithm and addresing")
@@ -330,7 +348,7 @@ if __name__ == "__main__":
 
     print("Number of messages: ", msgCount)
 
-
+    """
     """
     Considerations:
     - Remove node from network? 
@@ -343,8 +361,10 @@ if __name__ == "__main__":
     - More "real world" simulation
     """
     # Create the GIF
-    imageio.mimsave('output.gif', network.images, loop = 1)
+    #imageio.mimsave('output.gif', network.images, loop = 1)
+    imageio.mimsave('output.gif', network.images, format='GIF', duration=500, loop = 1)
 
-    # Remove the individual images after creating the GIF
+    #Remove the individual images after creating the GIF
     for i in range(len(network.images)):
         os.remove(f'output_{i}.png')
+
