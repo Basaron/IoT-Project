@@ -97,6 +97,9 @@ class Node:
         for neighbor in self.neighbors:
             neighbor.process_dis(dis_msg)
             msgCount += 1
+        
+        yield self.env.timeout(self.send_delay)  # add this line to create a delay after sending dis messages
+
 
     #send dio messages to node that sent dis message
     def process_dis(self, dis_msg):
@@ -125,7 +128,7 @@ class Node:
 
     """
     Transmission functions
-    
+    """
     #LOOK MORE INTO THIS 
     def repair(self):
         self.rank += 10  # Increase rank to initiate local repair
@@ -146,4 +149,3 @@ class Node:
             self.dio_count = 0
             I *= 2
             t = I / 2 + random.uniform(0, I / 2)
-    """

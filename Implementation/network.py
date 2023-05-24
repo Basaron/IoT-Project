@@ -43,7 +43,14 @@ class Network:
         #discovering neighbors for each node
         for node in self.nodes:
             node.discover_neighbors(self, max_distance)  # Node discovers its neighbors based on max distance
-    
+
+
+    def update_dodag(self, max_distance):
+        #update neighbours
+        for node in self.nodes:
+            node.discover_neighbors(self, max_distance)  # Node discovers its neighbors based on max distance
+
+
 
     def start_simulation_dio(self, simulation_time):
         #set root node rank 
@@ -52,7 +59,15 @@ class Network:
         # create a process for each node to send a DIO message    
         self.env.process(self.nodes[0].send_dio())
         self.env.run(until=simulation_time)
+
+
+    def start_simulation_dis(self, new_node, simulation_time):
+        #new node sends dis message
+        self.env.process(new_node.send_dis())
+        self.env.run(until=simulation_time)
     
+    #make an function that updates the DODAG i.e. the parent and children of each node, and the rank of each node, neightbors of each node
+
 
     def visualize(self, title, node_id_sender, node_reciver, send_msg, makeGIF = True):
         if makeGIF:
