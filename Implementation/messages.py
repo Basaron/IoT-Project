@@ -29,6 +29,7 @@ class DAO_Message:
     - Helps to build the routing table and establish routes from the root to the leaves
     - 
     """
-    def __init__(self, sender, prefix):
+    def __init__(self, sender, prefix, routing_table):
         self.sender = sender
+        self.routing_table = routing_table
         self.prefix = prefix

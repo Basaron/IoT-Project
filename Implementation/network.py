@@ -84,7 +84,7 @@ class Network:
             if send_msg:
                 dx = self.get_node(node_reciver).position[0] - self.get_node(node_id_sender).position[0]  # calculate difference in x 
                 dy = self.get_node(node_reciver).position[1] - self.get_node(node_id_sender).position[1]  # calculate difference in y
-                plt.arrow(self.get_node(node_id_sender).position[0], self.get_node(node_id_sender).position[1], dx-0.2, dy-0.2, zorder=2, color='g', 
+                plt.arrow(self.get_node(node_id_sender).position[0], self.get_node(node_id_sender).position[1], dx, dy, zorder=5, color='g', 
                 length_includes_head=True, head_width=0.2, head_length=0.3)
                 #plt.plot(*zip(self.get_node(node_id_sender).position, self.get_node(node_reciver).position), color='g')
 
