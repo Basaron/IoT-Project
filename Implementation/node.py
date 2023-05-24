@@ -23,6 +23,7 @@ class Node:
         self.parent = None
         self.dio_count = 0
         self.address = f"aaaa::{node_id}"
+        self.routing_table = []
         self.children = []
         self.send_delay = 1
 
@@ -60,7 +61,7 @@ class Node:
     #send dio messages to all neighbors
     def send_dio(self):
         global msgCount                                 #global variable to count the number of messages sent        
-       
+
         for neighbor in self.neighbors:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
             rank = self.rank + self.distance(neighbor)  
             dio_msg = DIO_Message(self, rank)
@@ -68,16 +69,20 @@ class Node:
             neighbor.process_dio(dio_msg)               #all neighbors process the dio message
             msgCount += 1
 
-        yield self.env.timeout(self.send_delay)                       #wait for 1 second before sending another dio message
+        if self.children == []:
+            self.env.process(self.send_dao())
+        yield self.env.timeout(self.send_delay)                      #wait for 1 second before sending another dio message
         
     #process dio message
     def process_dio(self, dio_msg):
         if dio_msg.rank < self.rank:                    #rank rule in RPL: node's rank must be greater than its parent's rank 
             self.rank = dio_msg.rank                    
             self.parent = dio_msg.sender                #parent is the node that sent the dio message
-            self.network.visualize(f'Node {self.node_id} processed DIO message from {dio_msg.sender.node_id}', self.node_id, dio_msg.sender.node_id, False)               #parent is the node that sent the dio message
+            self.network.visualize(f'Node {self.node_id} processed DIO message from {dio_msg.sender.node_id}', self.node_id, dio_msg.sender.node_id, False)  #parent is the node that sent the dio message
+            self.env.process(self.send_dao())
             self.env.process(self.send_dio())                             #keep sending dio messages to neighbors until no candidate parents are found
         self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
+                                
 
     #send dio message to specific node
     def send_dio_to(self, target_node):
@@ -106,11 +111,11 @@ class Node:
     def send_dao(self):
         global msgCount
         if self.parent:                                     #only send dao message if node has a parent
-            dao_msg = DAO_Message(self, self.address)       
+            dao_msg = DAO_Message(self, self.address, self.routing_table)
+            self.network.visualize(f'Node {self.node_id} sent DAO message to {self.parent.node_id}', self.node_id, self.parent.node_id, True)     
             self.parent.process_dao(dao_msg)
             msgCount += 1
-        
-        #self.network.visualize(f'Node {self.node_id} sent DAO message')
+        yield self.env.timeout(self.send_delay) 
 
 
     #process dao messages
@@ -119,9 +124,18 @@ class Node:
         if not ((dao_msg.sender.node_id, dao_msg.prefix) in self.children):
             self.children.append((dao_msg.sender.node_id, dao_msg.prefix))
         
+        if not ((dao_msg.prefix, dao_msg.prefix) in self.routing_table):
+            self.routing_table.append((dao_msg.prefix, dao_msg.prefix))
+        
+        for address in dao_msg.routing_table:
+            if not ((dao_msg.prefix, address[1]) in self.routing_table):
+                self.routing_table.append((dao_msg.prefix, address[1]))
+
+        self.network.visualize(f'Node {self.node_id} processed DAO message from {dao_msg.sender.node_id}', self.node_id, dao_msg.sender.node_id, False)
+
         #forward DAO message up the DODAG
         if self.parent:
-            self.send_dao()                                                    
+            self.env.process(self.send_dao())                                                    
 
     """
     Transmission functions

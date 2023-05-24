@@ -34,6 +34,10 @@ def make_dodag(network):
         #printing the rank and parent of each node
         for node in network.nodes:
             print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+            print(f"Node {node.node_id} route table: {node.routing_table}")
+            
+
+        
 
         #visualize the network
         imageio.mimsave('output.gif', network.images, format='GIF', duration=500, loop = 1)
