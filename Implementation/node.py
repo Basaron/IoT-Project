@@ -1,4 +1,4 @@
-
+import time
 import math
 import random
 from messages import DAO_Message, DIS_Message, DIO_Message
@@ -60,26 +60,29 @@ class Node:
     """
     #send dio messages to all neighbors
     def send_dio(self):
-        global msgCount                                 #global variable to count the number of messages sent        
+        global msgCount
+        yield self.env.timeout(self.send_delay)                                 #global variable to count the number of messages sent        
+        print(self.node_id, self.env.now)
+        for neighbor in self.neighbors:
+            if neighbor != self.parent:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
+                rank = self.rank + self.distance(neighbor)  
+                dio_msg = DIO_Message(self, rank)
+                self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id} at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now)
+                neighbor.process_dio(dio_msg)               #all neighbors process the dio message
+                msgCount += 1
 
-        for neighbor in self.neighbors:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
-            rank = self.rank + self.distance(neighbor)  
-            dio_msg = DIO_Message(self, rank)
-            self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id}', self.node_id, neighbor.node_id, True)
-            neighbor.process_dio(dio_msg)               #all neighbors process the dio message
-            msgCount += 1
-
-        if self.children == []:
+        yield self.env.timeout(self.send_delay)
+        if not self.children:
             self.env.process(self.send_dao())
-        yield self.env.timeout(self.send_delay)                      #wait for 1 second before sending another dio message
+                              #wait for 1 second before sending another dio message
         
     #process dio message
     def process_dio(self, dio_msg):
         if dio_msg.rank < self.rank:                    #rank rule in RPL: node's rank must be greater than its parent's rank 
             self.rank = dio_msg.rank                    
             self.parent = dio_msg.sender                #parent is the node that sent the dio message
-            self.network.visualize(f'Node {self.node_id} processed DIO message from {dio_msg.sender.node_id}', self.node_id, dio_msg.sender.node_id, False)  #parent is the node that sent the dio message
-            self.env.process(self.send_dao())
+            self.network.visualize(f'Node {self.node_id} processed DIO message from {dio_msg.sender.node_id}, at time {self.env.now}', self.node_id, dio_msg.sender.node_id, False, self.env.now)  #parent is the node that sent the dio message
+            #self.env.process(self.send_dao())
             self.env.process(self.send_dio())                             #keep sending dio messages to neighbors until no candidate parents are found
         self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
                                 
@@ -89,6 +92,7 @@ class Node:
         global msgCount                                 
         rank = self.rank + self.distance(target_node)   #update rank
         dio_msg = DIO_Message(self, rank)
+        self.network.visualize(f'Node {self.node_id} sent DIO message to {target_node.node_id}, at time {self.env.now}', self.node_id, target_node.node_id, True, self.env.now)
         target_node.process_dio(dio_msg)                
         msgCount += 1
 
@@ -100,6 +104,7 @@ class Node:
 
         #going through all neighbors and sending dis message to each one
         for neighbor in self.neighbors:
+            self.network.visualize(f'Node {self.node_id} sent DIS message to {neighbor.node_id}, at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now)
             neighbor.process_dis(dis_msg)
             msgCount += 1
         
@@ -115,7 +120,7 @@ class Node:
         global msgCount
         if self.parent:                                     #only send dao message if node has a parent
             dao_msg = DAO_Message(self, self.address, self.routing_table)
-            self.network.visualize(f'Node {self.node_id} sent DAO message to {self.parent.node_id}', self.node_id, self.parent.node_id, True)     
+            self.network.visualize(f'Node {self.node_id} sent DAO message to {self.parent.node_id}, at time {self.env.now}', self.node_id, self.parent.node_id, True, self.env.now)     
             self.parent.process_dao(dao_msg)
             msgCount += 1
         yield self.env.timeout(self.send_delay) 
@@ -134,7 +139,7 @@ class Node:
             if not ((dao_msg.prefix, address[1]) in self.routing_table):
                 self.routing_table.append((dao_msg.prefix, address[1]))
 
-        self.network.visualize(f'Node {self.node_id} processed DAO message from {dao_msg.sender.node_id}', self.node_id, dao_msg.sender.node_id, False)
+        self.network.visualize(f'Node {self.node_id} processed DAO message from {dao_msg.sender.node_id}, at time {self.env.now}', self.node_id, dao_msg.sender.node_id, False, self.env.now)
 
         #forward DAO message up the DODAG
         if self.parent:

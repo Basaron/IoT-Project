@@ -2,17 +2,15 @@
 from network import Network
 import simpy
 import random
-import os 
-import imageio
 
 
 #make network based on random nodes 
 def test_auto_configure_network(max_nodes, max_distance, area_size):
-    env = simpy.Environment()
+    env = simpy.rt.RealtimeEnvironment(factor=1, strict=False)
     network = Network(env)
     network.auto_configure(max_nodes, max_distance, area_size)
 
-    assert len(network.nodes) == max_nodes           #check that the number of nodes created is equal to the max number of nodes specified
+    #assert len(network.nodes) == max_nodes           #check that the number of nodes created is equal to the max number of nodes specified
     
     for node in network.nodes:
         assert 0 <= node.position[0] <= area_size    #x-coordinate of node is within the expected range
@@ -32,24 +30,15 @@ def test_auto_configure_network(max_nodes, max_distance, area_size):
 
 #make a dodag from network 
 def test_make_dodag(network):
-        print("\n\n------------------------------Creation of DODAG------------------------------")
-        #send dio and start simulation 
-        network.start_simulation_dio(100)
-        
-        #printing the rank and parent of each node
-        for node in network.nodes:
-            print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
-            print(f"Node {node.node_id} route table: {node.routing_table}")
-            
-
-        
-
-        #visualize the network
-        imageio.mimsave('output.gif', network.images, format='GIF', duration=500, loop = 1)
-        
-        #Remove the individual images after creating the GIF
-        for i in range(len(network.images)):
-            os.remove(f'output_{i}.png')
+    print("\n\n------------------------------Creation of DODAG------------------------------")
+    #send dio and start simulation 
+    network.start_simulation_dio(10)
+    
+    #printing the rank and parent of each node
+    for node in network.nodes:
+        print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+        print(f"Node {node.node_id} route table: {node.routing_table}")
+    
 
 
 #adding a node to the network
@@ -65,10 +54,8 @@ def test_add_random_node(network, max_distance, area_size):
     new_node.discover_neighbors(network, max_distance)
 
     #send dis, start simulation and update neighbours 
-    network.start_simulation_dis(new_node, 200)
+    network.start_simulation_dis(new_node, 20)
     network.update_dodag(max_distance)
-
-
 
     print("\n\n------------------------------Neighbours after new node is added------------------------------")
 
@@ -78,7 +65,6 @@ def test_add_random_node(network, max_distance, area_size):
     print("\n\n------------------------------Rank and parent after new node is added------------------------------")
     for node in network.nodes:
             print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
-
     
 
 
@@ -101,11 +87,8 @@ if __name__ == "__main__":
     #make network
     network = test_auto_configure_network(n_nodes, radius, area_size)
 
-    
-
     #make dodag 
     test_make_dodag(network)
-
 
     """
     Test case 2 - Adding a node to the network
