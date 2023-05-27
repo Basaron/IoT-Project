@@ -1,0 +1,80 @@
+------------------------------Network created------------------------------
+Node 0 has position (5, 5) and neighbors: [1, 2, 3, 4]
+Node 1 has position (7, 7) and neighbors: [0]
+Node 2 has position (3, 3) and neighbors: [0, 6, 7, 8]
+Node 3 has position (3, 7) and neighbors: [0, 5, 8]
+Node 4 has position (7, 3) and neighbors: [0, 6, 9]
+Node 5 has position (4, 9) and neighbors: [3]
+Node 6 has position (5, 1) and neighbors: [2, 4, 7]
+Node 7 has position (3, 1) and neighbors: [2, 6]
+Node 8 has position (1, 5) and neighbors: [2, 3]
+Node 9 has position (9, 4) and neighbors: [4]
+
+
+------------------------------Rank, Parent and Routing Table after dodag ------------------------------
+Node 0 rank: 0, and parent: None
+Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::6'), ('aaaa::2', 'aaaa::7'), ('aaaa::2', 'aaaa::8'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::5'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::9')]
+Node 1 rank: 2.8284271247461903, and parent: 0
+Node 1 route table: []
+Node 2 rank: 2.8284271247461903, and parent: 0
+Node 2 route table: [('aaaa::6', 'aaaa::6'), ('aaaa::7', 'aaaa::7'), ('aaaa::8', 'aaaa::8')]
+Node 3 rank: 2.8284271247461903, and parent: 0
+Node 3 route table: [('aaaa::5', 'aaaa::5')]
+Node 4 rank: 2.8284271247461903, and parent: 0
+Node 4 route table: [('aaaa::9', 'aaaa::9')]
+Node 5 rank: 5.06449510224598, and parent: 3
+Node 5 route table: []
+Node 6 rank: 5.656854249492381, and parent: 2
+Node 6 route table: []
+Node 7 rank: 4.82842712474619, and parent: 2
+Node 7 route table: []
+Node 8 rank: 5.656854249492381, and parent: 2
+Node 8 route table: []
+Node 9 rank: 5.06449510224598, and parent: 4
+Node 9 route table: []
+
+
+------------------------------Rank, Parent and Routing Table after node is dead------------------------------
+Node 0 rank: 0, and parent: None
+Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::6'), ('aaaa::2', 'aaaa::7'), ('aaaa::2', 'aaaa::8'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::5'), ('aaaa::3', 'aaaa::8'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::9'), ('aaaa::4', 'aaaa::6'), ('aaaa::4', 'aaaa::7')]
+Node 1 rank: 2.8284271247461903, and parent: 0
+Node 1 route table: []
+Node 2 rank: inf, and parent: None
+Node 2 route table: []
+Node 3 rank: 2.8284271247461903, and parent: 0
+Node 3 route table: [('aaaa::5', 'aaaa::5'), ('aaaa::8', 'aaaa::8')]
+Node 4 rank: 2.8284271247461903, and parent: 0
+Node 4 route table: [('aaaa::9', 'aaaa::9'), ('aaaa::6', 'aaaa::6'), ('aaaa::6', 'aaaa::7')]
+Node 5 rank: 5.06449510224598, and parent: 3
+Node 5 route table: []
+Node 6 rank: 5.656854249492381, and parent: 4
+Node 6 route table: [('aaaa::7', 'aaaa::7')]
+Node 7 rank: 7.656854249492381, and parent: 6
+Node 7 route table: []
+Node 8 rank: 5.656854249492381, and parent: 3
+Node 8 route table: []
+Node 9 rank: 5.06449510224598, and parent: 4
+Node 9 route table: []
+
+
+------------------------------Rank, Parent and Routing Table after node repaired------------------------------
+Node 0 rank: 0, and parent: None
+Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::5'), ('aaaa::3', 'aaaa::8'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::9'), ('aaaa::4', 'aaaa::6'), ('aaaa::4', 'aaaa::7'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::7')]
+Node 1 rank: 2.8284271247461903, and parent: 0
+Node 1 route table: []
+Node 2 rank: 2.8284271247461903, and parent: 0
+Node 2 route table: [('aaaa::7', 'aaaa::7')]
+Node 3 rank: 2.8284271247461903, and parent: 0
+Node 3 route table: [('aaaa::5', 'aaaa::5'), ('aaaa::8', 'aaaa::8')]
+Node 4 rank: 2.8284271247461903, and parent: 0
+Node 4 route table: [('aaaa::9', 'aaaa::9'), ('aaaa::6', 'aaaa::6'), ('aaaa::6', 'aaaa::7')]
+Node 5 rank: 5.06449510224598, and parent: 3
+Node 5 route table: []
+Node 6 rank: 5.656854249492381, and parent: 4
+Node 6 route table: [('aaaa::7', 'aaaa::7')]
+Node 7 rank: 4.82842712474619, and parent: 2
+Node 7 route table: []
+Node 8 rank: 5.656854249492381, and parent: 3
+Node 8 route table: []
+Node 9 rank: 5.06449510224598, and parent: 4
+Node 9 route table: []

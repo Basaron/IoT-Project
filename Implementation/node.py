@@ -27,6 +27,7 @@ class Node:
         self.children = []
         self.send_delay = 1
         self.node_status = True
+        self.I = 0
 
     """
     Functions 
@@ -61,23 +62,24 @@ class Node:
     """
     #send dio messages to all neighbors
     def send_dio(self):
-        #yield self.env.timeout(self.send_delay)                                 #global variable to count the number of messages sent        
-        #print(self.node_id, self.env.now)
-        for neighbor in self.neighbors:
-            if neighbor.node_status:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
-                rank = self.rank + self.distance(neighbor)  
-                dio_msg = DIO_Message(self, rank)
-                self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id} at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now, 0)
-                self.env.process(neighbor.process_dio(dio_msg))               #all neighbors process the dio message
-            elif neighbor == self.parent:
-                self.parent = None
-                self.rank = float('inf')  # Initially set to infinity
-            elif neighbor in self.children:
-                self.children.remove(neighbor)
+        if self.node_status:
+            #yield self.env.timeout(self.send_delay)                                 #global variable to count the number of messages sent        
+            #print(self.node_id, self.env.now)
+            for neighbor in self.neighbors:
+                if neighbor.node_status:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
+                    rank = self.rank + self.distance(neighbor)  
+                    dio_msg = DIO_Message(self, rank)
+                    self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id} at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now, 0)
+                    self.env.process(neighbor.process_dio(dio_msg))               #all neighbors process the dio message
+                elif neighbor == self.parent:
+                    self.parent = None
+                    self.rank = float('inf')  # Initially set to infinity
+                elif neighbor in self.children:
+                    self.children.remove(neighbor)
 
-        yield self.env.timeout(self.send_delay)
-        #if not self.children:
-        #    self.env.process(self.send_dao())
+            yield self.env.timeout(self.send_delay)
+            #if not self.children:
+            #    self.env.process(self.send_dao())
                               
         
     #process dio message
@@ -94,7 +96,7 @@ class Node:
                 self.env.process(self.trickle())
             else:
                 self.env.process(self.send_dio())                             #keep sending dio messages to neighbors until no candidate parents are found
-        self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
+            self.dio_count += 1                             #number of consistsen DIO messages received. used as counter in trickle algorithm
                                 
 
     #send dio message to specific node
@@ -166,6 +168,7 @@ class Node:
         self.rank = float('inf')  # Initially set to infinity
         self.routing_table.clear()
         self.node_status = False
+        self.I = self.network.I_min
 
     #LOOK MORE INTO THIS 
     def repair_node(self):
@@ -177,19 +180,28 @@ class Node:
     def trickle(self):
         global trikkel_alg
         trikkel_alg = True
-
-        I = self.network.I_min                               #minimum interval
-        t = I / 2 + random.uniform(0, I / 2)    #determine random time between I_min/2 and I_min 
+        self.network.visualize(f'Node {self.node_id} started dio with trikkel', self.node_id, 0, False, self.env.now, 0)
+        self.I = self.network.I_min                               #minimum interval
+        t = self.I / 2 + random.uniform(0, self.I / 2)    #determine random time between I_min/2 and I_min 
 
         #keep sending dis messages until I_max is reached: If max is reached then the least energy is used 
-        while I <= self.network.I_max:
-            print(self.node_id, I)
+        while self.I <= self.network.I_max:
+            print(self.env.now, self.node_id, self.I)
             yield self.env.timeout(t)       #wait for t time units i.e. node is idle/listening 
-            if self.dio_count < self.network.k:          #node decides whether to transmit its own control message i.e DIS message if its counter is less than k (user-defined threshold)
-                self.network.visualize(f'Node {self.node_id} started dio with trikkel', self.node_id, 0, False, self.env.now, 0)
-                self.env.process(self.send_dio())
-            
+            self.env.process(self.send_dio())
+            if self.dio_count > self.network.k:          #node decides whether to transmit its own control message i.e DIS message if its counter is less than k (user-defined threshold)
+                self.I = self.network.I_min 
+            """
+            if self.parent:
+                if self.parent.node_status == False:
+                    I = self.network.I_min
+                    self.env.process(self.send_dio())
+            """
             #if no DIS messages are received within time interval, the interval is doubled for the next round in order to reduce the number of transmissions
             self.dio_count = 0
-            I *= 2
-            t = I / 2 + random.uniform(0, I / 2)
+            if self.I >= self.network.I_max:
+                self.I = self.network.I_max
+                t = self.I
+            else:
+                self.I *= 2
+                t = self.I / 2 + random.uniform(0, self.I / 2)

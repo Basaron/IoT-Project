@@ -51,7 +51,7 @@ class Network:
 
         x = 0
         if auto:
-            seed = 7477812928102893072
+            seed = 4211468740914749448
             rng = random.Random(seed)
             #adding random nodes in the network
             for i in range(max_nodes): 
@@ -113,7 +113,7 @@ class Network:
             self.add_node(17, (5,2))
             self.add_node(18, (0,2))
             self.add_node(19, (10,2))
-
+            
 
         #discovering neighbors for each node
         for node in self.nodes:
@@ -151,11 +151,40 @@ class Network:
     def start_simulation_trickle(self, simulation_time):
         self.nodes[0].rank = 0
         self.setup_results(simulation_time)
-        
+        print("--Time, node_id, I")
         self.env.process(self.nodes[0].trickle())   #start the Trickle algorithm for each node
         self.env.run(until=simulation_time)
         self.save_plts_as_gif("trickle.gif", "trickle.png")
     #make an function that updates the DODAG i.e. the parent and children of each node, and the rank of each node, neightbors of each node
+
+    def start_simulation_trickle_repair(self, simulation_time):
+        self.nodes[0].rank = 0
+        self.setup_results(simulation_time*3)
+        print("--Time, node_id, I")
+        self.env.process(self.nodes[0].trickle())   #start the Trickle algorithm for each node
+        self.env.run(until=simulation_time)
+        print("\n\n------------------------------Rank, Parent and Routing Table after dodag ------------------------------")
+        for node in self.nodes:
+                print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+                print(f"Node {node.node_id} route table: {node.routing_table}")
+
+        self.get_node(2).fail_node()
+
+        self.env.run(until=simulation_time*2)
+        print("\n\n------------------------------Rank, Parent and Routing Table after node is dead------------------------------")
+        for node in self.nodes:
+                print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+                print(f"Node {node.node_id} route table: {node.routing_table}")
+
+        self.get_node(2).repair_node()
+        self.env.run(until=simulation_time*3)
+        print("\n\n------------------------------Rank, Parent and Routing Table after node repaired------------------------------")
+        for node in self.nodes:
+                print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+                print(f"Node {node.node_id} route table: {node.routing_table}")
+
+
+        self.save_plts_as_gif("trickle.gif", "trickle.png")
 
     def start_simulation_repair(self):
         self.nodes[0].rank = 0
@@ -163,26 +192,47 @@ class Network:
 
         self.env.process(self.nodes[0].send_dio())
         self.env.run(until=20)
+
+        print("\n\n------------------------------Rank, Parent and Routing Table after dodag ------------------------------")
+        for node in self.nodes:
+                print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+                print(f"Node {node.node_id} route table: {node.routing_table}")
+
         #self.save_plts_as_gif("repair_build.gif", "repair_build.png")
-        self.get_node(2).fail_node()
-        """ 
+        self.get_node(4).fail_node()
+        """
+        #made example
         self.env.process(self.nodes[0].send_dio())
         self.env.process(self.nodes[6].send_dio())
         self.env.process(self.nodes[7].send_dio())
         self.env.process(self.nodes[8].send_dio())
         self.env.process(self.nodes[4].send_dio())
         self.env.process(self.nodes[3].send_dio())
-        """
-
+        #big tree and seed 1
         self.env.process(self.nodes[0].send_dio())
         self.env.process(self.nodes[4].send_dio())
         self.env.process(self.nodes[3].send_dio())
         self.env.process(self.nodes[5].send_dio())
         self.env.process(self.nodes[7].send_dio())
-
+        """ 
+        #seed2
+        self.env.process(self.nodes[7].send_dio())
+        self.env.process(self.nodes[4].send_dio())
+        
+        
         self.env.run(until=40)
-        self.get_node(2).repair_node()
+        print("\n\n------------------------------Rank, Parent and Routing Table after node is dead------------------------------")
+        for node in self.nodes:
+                print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+                print(f"Node {node.node_id} route table: {node.routing_table}")
+
+        self.get_node(4).repair_node()
         self.env.run(until=60)
+        print("\n\n------------------------------Rank, Parent and Routing Table after node repaired------------------------------")
+        for node in self.nodes:
+                print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+                print(f"Node {node.node_id} route table: {node.routing_table}")
+
         self.save_plts_as_gif("repair.gif", "repair.png")
 
 
@@ -213,12 +263,12 @@ class Network:
             elif msg_type == 2:            
                 self.num_DIS_msg[timestamp-1] += 1
                 self.num_msg[timestamp-1] += 1
-        
+         
         filename = f'output_{self.number_of_images}.png'
         self.number_of_images += 1
         plt.savefig(filename)
-
-        self.images[timestamp-1].append(imageio.v2.imread(filename))
+        #self.images[timestamp-1].append(imageio.v2.imread(filename))
+        
         plt.close()
 
 
@@ -236,14 +286,19 @@ class Network:
         
         
         flat_list_of_images = [item for sublist in self.images for item in sublist]
-
+        """
         #visualize the network
         imageio.mimsave(name_gif, flat_list_of_images, format='GIF', duration=500, loop = 1)
         
         #Remove the individual images after creating the GIF
         for i in range(self.number_of_images):
             os.remove(f'output_{i}.png')
-        
+        """
+        total_msg_num = 0
+        for i in  self.num_msg:
+             total_msg_num += i
+        print("Total msg count: ",total_msg_num)
+
         self.images.clear()
         self.number_of_images = 0
         self.num_msg.clear()
