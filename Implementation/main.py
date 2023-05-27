@@ -5,10 +5,12 @@ import random
 
 
 #make network based on random nodes 
-def test_auto_configure_network(max_nodes, max_distance, area_size):
+def test_auto_configure_network(max_nodes, max_distance, area_size, auto):
     env = simpy.rt.RealtimeEnvironment(factor=1, strict=False)
     network = Network(env)
-    network.auto_configure(max_nodes, max_distance, area_size)
+   
+    network.auto_configure(max_nodes, max_distance, area_size, auto)
+    
 
     #assert len(network.nodes) == max_nodes           #check that the number of nodes created is equal to the max number of nodes specified
     
@@ -55,7 +57,7 @@ def test_add_random_node(network, max_distance, area_size):
 
     #send dis, start simulation and update neighbours 
     network.start_simulation_dis(new_node, 20)
-    network.update_dodag(max_distance)
+    #network.update_dodag(max_distance)
 
     print("\n\n------------------------------Neighbours after new node is added------------------------------")
 
@@ -65,11 +67,21 @@ def test_add_random_node(network, max_distance, area_size):
     print("\n\n------------------------------Rank and parent after new node is added------------------------------")
     for node in network.nodes:
             print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+            print(f"Node {node.node_id} route table: {node.routing_table}")
     
+def test_trickle():
 
+    sim_duration = 50
+    network.start_simulation_trickle(sim_duration)
+
+    #printing the rank and parent of each node
+    for node in network.nodes:
+        print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
+        print(f"Node {node.node_id} route table: {node.routing_table}")
 
 #removing a node from the network
-#def test_remove_random_node():
+def test_remove_and_repair_node(network):
+    network.start_simulation_repair()
      
 
 
@@ -85,7 +97,7 @@ if __name__ == "__main__":
     Test case 1 - Making a simple DODAG network based on random nodes
     """
     #make network
-    network = test_auto_configure_network(n_nodes, radius, area_size)
+    network = test_auto_configure_network(n_nodes, radius, area_size, True)
 
     #make dodag 
     test_make_dodag(network)
@@ -94,7 +106,7 @@ if __name__ == "__main__":
     Test case 2 - Adding a node to the network
     """
     #add a node to the network
-    test_add_random_node(network, radius, area_size)
+    #test_add_random_node(network, radius, area_size)
 
     #make dodag
     #make_dodag(network, newNode=True)
@@ -103,6 +115,12 @@ if __name__ == "__main__":
     """
     Test case 3 - Removing a node from the network
     """
+    #test_remove_and_repair_node(network)
+
+    """
+    Test case 4 - test trickle
+    """
+    #test_trickle()
 
 
 
