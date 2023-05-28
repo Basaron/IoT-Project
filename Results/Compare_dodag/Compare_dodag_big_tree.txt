@@ -1,0 +1,69 @@
+------------------------------Network created------------------------------
+Node 0 has position (5, 10) and neighbors: [1, 2]
+Node 1 has position (3, 8) and neighbors: [0, 6, 7, 8]
+Node 2 has position (7, 8) and neighbors: [0, 3, 4, 5]
+Node 3 has position (7, 6) and neighbors: [2, 4, 5, 7, 11, 12, 13, 16]   
+Node 4 has position (8, 6) and neighbors: [2, 3, 5, 11, 12, 13, 16]      
+Node 5 has position (6, 6) and neighbors: [2, 3, 4, 6, 7, 10, 11, 12, 16]
+Node 6 has position (3, 6) and neighbors: [1, 5, 7, 8, 9, 10, 14, 15]    
+Node 7 has position (4, 6) and neighbors: [1, 3, 5, 6, 8, 10, 11, 14, 15]
+Node 8 has position (2, 6) and neighbors: [1, 6, 7, 9, 10, 14, 15]
+Node 9 has position (1, 4) and neighbors: [6, 8, 10, 14, 15, 18]
+Node 10 has position (4, 4) and neighbors: [5, 6, 7, 8, 9, 11, 14, 15, 16, 17]
+Node 11 has position (6, 4) and neighbors: [3, 4, 5, 7, 10, 12, 13, 15, 16, 17]
+Node 12 has position (8, 4) and neighbors: [3, 4, 5, 11, 13, 16, 19]
+Node 13 has position (9, 4) and neighbors: [3, 4, 11, 12, 16, 19]
+Node 14 has position (2, 4) and neighbors: [6, 7, 8, 9, 10, 15, 18]
+Node 15 has position (3, 4) and neighbors: [6, 7, 8, 9, 10, 11, 14, 17]
+Node 16 has position (7, 4) and neighbors: [3, 4, 5, 10, 11, 12, 13, 17]
+Node 17 has position (5, 2) and neighbors: [10, 11, 15, 16]
+Node 18 has position (0, 2) and neighbors: [9, 14]
+Node 19 has position (10, 2) and neighbors: [12, 13]
+
+
+------------------------------Creation of DODAG------------------------------
+Total msg count:  2425
+DIO msg count:  2362
+DAO msg count:  63
+DIS msg count:  0
+Node 0 rank: 0, and parent: None
+Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::1', 'aaaa::7'), ('aaaa::1', 'aaaa::8'), ('aaaa::1', 'aaaa::9'), ('aaaa::1', 'aaaa::18'), ('aaaa::1', 'aaaa::6'), 
+('aaaa::1', 'aaaa::14'), ('aaaa::1', 'aaaa::15'), ('aaaa::1', 'aaaa::10'), ('aaaa::1', 'aaaa::17'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::5'), ('aaaa::2', 'aaaa::3'), ('aaaa::2', 'aaaa::11'), ('aaaa::2', 'aaaa::12'), ('aaaa::2', 'aaaa::16'), ('aaaa::2', 'aaaa::4'), ('aaaa::2', 'aaaa::13'), ('aaaa::2', 'aaaa::19')]
+Node 1 rank: 2.8284271247461903, and parent: 0
+Node 1 route table: [('aaaa::7', 'aaaa::7'), ('aaaa::8', 'aaaa::8'), ('aaaa::8', 'aaaa::9'), ('aaaa::8', 'aaaa::18'), ('aaaa::6', 'aaaa::6'), ('aaaa::6', 'aaaa::14'), ('aaaa::6', 'aaaa::15'), ('aaaa::6', 'aaaa::10'), ('aaaa::6', 'aaaa::17')]
+Node 2 rank: 2.8284271247461903, and parent: 0
+Node 2 route table: [('aaaa::5', 'aaaa::5'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::11'), ('aaaa::3', 'aaaa::12'), ('aaaa::3', 'aaaa::16'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::13'), ('aaaa::4', 'aaaa::19')]
+Node 3 rank: 4.82842712474619, and parent: 2
+Node 3 route table: [('aaaa::11', 'aaaa::11'), ('aaaa::12', 'aaaa::12'), ('aaaa::16', 'aaaa::16')]
+Node 4 rank: 5.06449510224598, and parent: 2
+Node 4 route table: [('aaaa::13', 'aaaa::13'), ('aaaa::13', 'aaaa::19')]
+Node 5 rank: 5.06449510224598, and parent: 2
+Node 5 route table: []
+Node 6 rank: 4.82842712474619, and parent: 1
+Node 6 route table: [('aaaa::14', 'aaaa::14'), ('aaaa::15', 'aaaa::15'), ('aaaa::10', 'aaaa::10'), ('aaaa::10', 'aaaa::17')]
+Node 7 rank: 5.06449510224598, and parent: 1
+Node 7 route table: []
+Node 8 rank: 5.06449510224598, and parent: 1
+Node 8 route table: [('aaaa::9', 'aaaa::9'), ('aaaa::9', 'aaaa::18')]
+Node 9 rank: 7.3005630797457695, and parent: 8
+Node 9 route table: [('aaaa::18', 'aaaa::18')]
+Node 10 rank: 7.06449510224598, and parent: 6
+Node 10 route table: [('aaaa::17', 'aaaa::17')]
+Node 11 rank: 7.06449510224598, and parent: 3
+Node 11 route table: []
+Node 12 rank: 7.06449510224598, and parent: 3
+Node 12 route table: []
+Node 13 rank: 7.3005630797457695, and parent: 4
+Node 13 route table: [('aaaa::19', 'aaaa::19')]
+Node 14 rank: 7.06449510224598, and parent: 6
+Node 14 route table: []
+Node 15 rank: 6.82842712474619, and parent: 6
+Node 15 route table: []
+Node 16 rank: 6.82842712474619, and parent: 3
+Node 16 route table: []
+Node 17 rank: 9.30056307974577, and parent: 10
+Node 17 route table: []
+Node 18 rank: 9.53663105724556, and parent: 9
+Node 18 route table: []
+Node 19 rank: 9.53663105724556, and parent: 13
+Node 19 route table: []

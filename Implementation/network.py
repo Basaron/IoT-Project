@@ -46,7 +46,7 @@ class Network:
     Simulation functions
     """
     #auto-configure network with randomly placed nodes
-    def auto_configure(self, max_nodes, max_distance, area_size, auto):
+    def auto_configure(self, max_nodes, max_distance, area_size, network_selectd):
         self.area_size = area_size
 
         #seeds are based on autoconfigued networks 
@@ -54,50 +54,23 @@ class Network:
         #seed 2: 4211468740914749448
 
         #make auto-configured network
-        if auto:
-            seed = 4211468740914749448          #run 
+        if network_selectd == 1:
+            seed = 7477812928102893072          #run 
             rng = random.Random(seed)
 
             #adding random nodes in the network
             for i in range(max_nodes): 
                 position = (rng.uniform(0, area_size), rng.uniform(0, area_size))  # randomly generate position within area
                 self.add_node(i, position)    
-                
-            """
-            #find 10 different seeds for 10 different networks
-            for i in range(10):
-                seed = random.randrange(sys.maxsize)
-                rng = random.Random(seed)
-                
-                for i in range(max_nodes): 
-                    position = (rng.uniform(0, area_size), rng.uniform(0, area_size))  # randomly generate position within area
-                    self.add_node(i, position)    
-                
+        elif network_selectd == 2:
+            seed = 4211468740914749448          #run 
+            rng = random.Random(seed)
 
-                plt.figure(figsize=(self.area_size + 1, self.area_size + 1))
-                plt.xlim(-1, self.area_size + 1)
-                plt.ylim(-1, self.area_size + 1)
-                plt.title("test", fontsize=20)
-
-                for node in self.nodes:
-                    color = 'g' if node.rank == 0 else 'r' if node.rank > 50 else 'b'
-                    plt.scatter(*node.position, s=1000, c=color, zorder=3)  # Increase size by setting s
-                    plt.text(node.position[0], node.position[1], str(node.node_id), color='white', ha='center', va='center', fontsize=20)  # Add text
-                    if node.parent:
-                        plt.plot(*zip(node.position, node.parent.position), 'k-',zorder=1)
-
-                plt.savefig(str(x))
-                print(x, seed)
-                plt.close()
-                self.nodes.clear()
-                x += 1
-                """
-
-
- 
-        #use manual network 
-        else:
-            """
+            #adding random nodes in the network
+            for i in range(max_nodes): 
+                position = (rng.uniform(0, area_size), rng.uniform(0, area_size))  # randomly generate position within area
+                self.add_node(i, position)     
+        elif network_selectd == 3:
             self.add_node(0, (5,5))
             self.add_node(1, (7,7))
             self.add_node(2, (3,3))
@@ -108,8 +81,8 @@ class Network:
             self.add_node(7, (3,1))
             self.add_node(8, (1,5))
             self.add_node(9, (9,4))
-            """
 
+        elif network_selectd == 4:
             self.add_node(0, (5,10))
             self.add_node(1, (3,8))
             self.add_node(2, (7,8))
@@ -130,6 +103,9 @@ class Network:
             self.add_node(17, (5,2))
             self.add_node(18, (0,2))
             self.add_node(19, (10,2))
+        else:
+             print("Not a valid network selection")
+            
             
 
         #discovering neighbors for each node
@@ -144,7 +120,7 @@ class Network:
 
 
     def setup_results(self, simulation_time):
-        self.images = [[]]*(simulation_time)
+        self.images = []
         self.num_msg =[0]*(simulation_time)
         self.num_DIO_msg =[0]*(simulation_time)
         self.num_DAO_msg =[0]*(simulation_time)
@@ -178,7 +154,7 @@ class Network:
         self.save_plts_as_gif("trickle.gif", "trickle.png")
 
 
-    def start_simulation_trickle_repair(self, simulation_time):
+    def start_simulation_trickle_repair(self, simulation_time, node_to_fail):
         self.nodes[0].rank = 0
         self.setup_results(simulation_time*3)
         print("--Time, node_id, I")
@@ -189,7 +165,7 @@ class Network:
                 print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
                 print(f"Node {node.node_id} route table: {node.routing_table}")
 
-        self.get_node(2).fail_node()
+        self.get_node(node_to_fail).fail_node()
 
         self.env.run(until=simulation_time*2)
         print("\n\n------------------------------Rank, Parent and Routing Table after node is dead------------------------------")
@@ -197,7 +173,7 @@ class Network:
                 print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
                 print(f"Node {node.node_id} route table: {node.routing_table}")
 
-        self.get_node(2).repair_node()
+        self.get_node(node_to_fail).repair_node()
         self.env.run(until=simulation_time*3)
         print("\n\n------------------------------Rank, Parent and Routing Table after node repaired------------------------------")
         for node in self.nodes:
@@ -208,12 +184,12 @@ class Network:
         self.save_plts_as_gif("trickle.gif", "trickle.png")
 
 
-    def start_simulation_repair(self):
+    def start_simulation_repair(self, node_to_fail):
         self.nodes[0].rank = 0
-        self.setup_results(60)
+        self.setup_results(150)
 
         self.env.process(self.nodes[0].send_dio())
-        self.env.run(until=20)
+        self.env.run(until=50)
 
         print("\n\n------------------------------Rank, Parent and Routing Table after DODAG ------------------------------")
         for node in self.nodes:
@@ -221,37 +197,16 @@ class Network:
                 print(f"Node {node.node_id} route table: {node.routing_table}")
 
         #self.save_plts_as_gif("repair_build.gif", "repair_build.png")
-        self.get_node(4).fail_node()
+        self.get_node(node_to_fail).fail_node()
         
-        """
-        #made example
-        self.env.process(self.nodes[0].send_dio())
-        self.env.process(self.nodes[6].send_dio())
-        self.env.process(self.nodes[7].send_dio())
-        self.env.process(self.nodes[8].send_dio())
-        self.env.process(self.nodes[4].send_dio())
-        self.env.process(self.nodes[3].send_dio())
-        #big tree and seed 1
-        self.env.process(self.nodes[0].send_dio())
-        self.env.process(self.nodes[4].send_dio())
-        self.env.process(self.nodes[3].send_dio())
-        self.env.process(self.nodes[5].send_dio())
-        self.env.process(self.nodes[7].send_dio())
-        """ 
-        
-        #seed2
-        self.env.process(self.nodes[7].send_dio())
-        self.env.process(self.nodes[4].send_dio())
-        
-        
-        self.env.run(until=40)
+        self.env.run(until=100)
         print("\n\n------------------------------Rank, Parent and Routing Table after node is dead------------------------------")
         for node in self.nodes:
                 print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
                 print(f"Node {node.node_id} route table: {node.routing_table}")
 
-        self.get_node(4).repair_node()
-        self.env.run(until=60)
+        self.get_node(node_to_fail).repair_node()
+        self.env.run(until=150)
         print("\n\n------------------------------Rank, Parent and Routing Table after node repaired------------------------------")
         for node in self.nodes:
                 print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
@@ -291,11 +246,12 @@ class Network:
                 self.num_DIS_msg[timestamp-1] += 1
                 self.num_msg[timestamp-1] += 1
          
+        """
         filename = f'output_{self.number_of_images}.png'
         self.number_of_images += 1
         plt.savefig(filename)
-        #self.images[timestamp-1].append(imageio.v2.imread(filename))
-        
+        self.images.append(imageio.v2.imread(filename))
+        """
         plt.close()
 
 
@@ -312,19 +268,30 @@ class Network:
         plt.close()
         
         
-        flat_list_of_images = [item for sublist in self.images for item in sublist]
+        #flat_list_of_images = [item for sublist in self.images for item in sublist]
         """
         #visualize the network
-        imageio.mimsave(name_gif, flat_list_of_images, format='GIF', duration=500, loop = 1)
+        imageio.mimsave(name_gif, self.images, format='GIF', duration=500, loop = 1)
         
         #Remove the individual images after creating the GIF
         for i in range(self.number_of_images):
             os.remove(f'output_{i}.png')
         """
         total_msg_num = 0
-        for i in  self.num_msg:
-             total_msg_num += i
+        DIO_msg_num = 0
+        DAO_msg_num = 0
+        DIS_msg_num = 0
+
+        for i in range(len(self.num_msg)):
+            total_msg_num += self.num_msg[i]
+            DIO_msg_num += self.num_DIO_msg[i]
+            DAO_msg_num += self.num_DAO_msg[i]
+            DIS_msg_num += self.num_DIS_msg[i]
+
         print("Total msg count: ",total_msg_num)
+        print("DIO msg count: ",DIO_msg_num)
+        print("DAO msg count: ",DAO_msg_num)
+        print("DIS msg count: ",DIS_msg_num)
 
         self.images.clear()
         self.number_of_images = 0

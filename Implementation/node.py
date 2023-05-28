@@ -28,6 +28,7 @@ class Node:
         self.send_delay = 1
         self.node_status = True
         self.I = 0
+        self.is_sending_dio = False
 
     """
     Functions 
@@ -62,24 +63,28 @@ class Node:
     """
     #send dio messages to all neighbors
     def send_dio(self):
-        if self.node_status:
-            #yield self.env.timeout(self.send_delay)                                 #global variable to count the number of messages sent        
-            #print(self.node_id, self.env.now)
-            for neighbor in self.neighbors:
-                if neighbor.node_status:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
-                    rank = self.rank + self.distance(neighbor)  
-                    dio_msg = DIO_Message(self, rank)
-                    self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id} at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now, 0)
-                    self.env.process(neighbor.process_dio(dio_msg))               #all neighbors process the dio message
-                elif neighbor == self.parent:
-                    self.parent = None
-                    self.rank = float('inf')  # Initially set to infinity
-                elif neighbor in self.children:
-                    self.children.remove(neighbor)
+        if not self.is_sending_dio:
+            self.is_sending_dio = True
+            while True:
+                if self.node_status:
+                    #yield self.env.timeout(self.send_delay)                                 #global variable to count the number of messages sent        
+                    #print(self.node_id, self.env.now)
+                    for neighbor in self.neighbors:
+                        if neighbor.node_status:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
+                            rank = self.rank + self.distance(neighbor)  
+                            dio_msg = DIO_Message(self, rank)
+                            self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id} at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now, 0)
+                            self.env.process(neighbor.process_dio(dio_msg))               #all neighbors process the dio message
+                        elif neighbor == self.parent:
+                            self.parent = None
+                            self.rank = float('inf')  # Initially set to infinity
+                        elif neighbor in self.children:
+                            self.children.remove(neighbor)
 
-            yield self.env.timeout(self.send_delay)
-            #if not self.children:
-            #    self.env.process(self.send_dao())
+                yield self.env.timeout(8)
+                    #if not self.children:
+                    #    self.env.process(self.send_dao())
+            
                               
         
     #process dio message

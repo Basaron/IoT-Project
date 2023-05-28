@@ -40,7 +40,7 @@ def test_make_dodag(network):
     """
     print("\n\n------------------------------Creation of DODAG------------------------------")
     #send dio and start simulation 
-    network.start_simulation_dio(10)
+    network.start_simulation_dio(150)
     
     #printing the rank and parent of each node
     for node in network.nodes:
@@ -78,7 +78,7 @@ def test_add_random_node(network, max_distance, area_size):
     
 
 
-def test_trickle():
+def test_trickle(network):
     """
     Test trickle
     """
@@ -92,7 +92,7 @@ def test_trickle():
 
 
 
-def test_trickle_repair():
+def test_trickle_repair(network, node_to_fail):
     """
     Test trickle repair
     """
@@ -106,11 +106,11 @@ def test_trickle_repair():
 
 
 
-def test_remove_and_repair_node(network):
+def test_remove_and_repair_node(network,node_to_fail):
     """
     Remove node from network and repair network
     """
-    network.start_simulation_repair()
+    network.start_simulation_repair(node_to_fail)
      
 
 
@@ -123,10 +123,17 @@ if __name__ == "__main__":
     area_size = 10
 
     """
+    1 is seed1
+    2 is seed2
+    3 is made example
+    4 is big tree
+    
+    """
+    """
     Test case 1 - Making a simple DODAG network based on random nodes
     """
-    network = test_auto_configure_network(n_nodes, radius, area_size, False)
-    #test_make_dodag(network)
+    network = test_auto_configure_network(n_nodes, radius, area_size, 4)
+    test_make_dodag(network)
 
     """
     Test case 2 - Adding a node to the network
@@ -137,16 +144,16 @@ if __name__ == "__main__":
     """
     Test case 3 - Removing a node from the network
     """
-    #test_remove_and_repair_node(network)
+    #test_remove_and_repair_node(network, 2)
 
     """
     Test case 4 - test trickle
     """
-    test_trickle()
+    #test_trickle(network)
 
     """
     Test case 5 - test trickle repair
     """
-    #test_trickle_repair()
+    #test_trickle_repair(network)
 
 
