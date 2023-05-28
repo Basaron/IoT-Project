@@ -12,18 +12,22 @@ class Network:
     """
     def __init__(self, env):
         self.env = env
-        self.nodes = []     #list of nodes in the network
-        self.images = []    #list of images for GIF
+        self.nodes = []             #list of nodes in the network
+        self.images = []            #list of images for GIF
         self.num_all_msg =[]
         self.num_DIO_msg =[]
         self.num_DAO_msg =[]
         self.num_DIS_msg =[]
         self.number_of_images = 0
         self.area_size = 0
-        self.I_min = 1  # Minimum interval for Trickle algorithm
-        self.I_max = 16  # Maximum interval for Trickle algorithm
-        self.k = 1      # Redundancy constant
+        self.I_min = 1              #minimum interval for Trickle algorithm
+        self.I_max = 16             #maximum interval for Trickle algorithm
+        self.k = 1                  #redundancy constant
 
+
+    """
+    Adder and Getter functions
+    """
     #add node to the network 
     def add_node(self, node_id, position):
         new_node = Node(self.env, self, node_id, position) #information: node id and position 
@@ -45,41 +49,53 @@ class Network:
     def auto_configure(self, max_nodes, max_distance, area_size, auto):
         self.area_size = area_size
 
+        #seeds are based on autoconfigued networks 
         #seed 1: 7477812928102893072
         #seed 2: 4211468740914749448
 
-
-        x = 0
+        #make auto-configured network
         if auto:
-            seed = 4211468740914749448
+            seed = 4211468740914749448          #run 
             rng = random.Random(seed)
+
             #adding random nodes in the network
             for i in range(max_nodes): 
                 position = (rng.uniform(0, area_size), rng.uniform(0, area_size))  # randomly generate position within area
-                self.add_node(i, position)
+                self.add_node(i, position)    
                 
-                """
-                for i in range(10):
+            """
+            #find 10 different seeds for 10 different networks
+            for i in range(10):
                 seed = random.randrange(sys.maxsize)
                 rng = random.Random(seed)
+                
+                for i in range(max_nodes): 
+                    position = (rng.uniform(0, area_size), rng.uniform(0, area_size))  # randomly generate position within area
+                    self.add_node(i, position)    
+                
 
                 plt.figure(figsize=(self.area_size + 1, self.area_size + 1))
                 plt.xlim(-1, self.area_size + 1)
                 plt.ylim(-1, self.area_size + 1)
                 plt.title("test", fontsize=20)
+
                 for node in self.nodes:
                     color = 'g' if node.rank == 0 else 'r' if node.rank > 50 else 'b'
                     plt.scatter(*node.position, s=1000, c=color, zorder=3)  # Increase size by setting s
                     plt.text(node.position[0], node.position[1], str(node.node_id), color='white', ha='center', va='center', fontsize=20)  # Add text
                     if node.parent:
                         plt.plot(*zip(node.position, node.parent.position), 'k-',zorder=1)
-                
+
                 plt.savefig(str(x))
                 print(x, seed)
                 plt.close()
                 self.nodes.clear()
-                x += 1"""
+                x += 1
+                """
 
+
+ 
+        #use manual network 
         else:
             """
             self.add_node(0, (5,5))
@@ -93,6 +109,7 @@ class Network:
             self.add_node(8, (1,5))
             self.add_node(9, (9,4))
             """
+
             self.add_node(0, (5,10))
             self.add_node(1, (3,8))
             self.add_node(2, (7,8))
@@ -120,10 +137,11 @@ class Network:
             node.discover_neighbors(self, max_distance)  # Node discovers its neighbors based on max distance
 
 
-    def update_dodag(self, max_distance):
+    def update_neighbors(self, max_distance):
         #update neighbours
         for node in self.nodes:
             node.discover_neighbors(self, max_distance)  # Node discovers its neighbors based on max distance
+
 
     def setup_results(self, simulation_time):
         self.images = [[]]*(simulation_time)
@@ -131,6 +149,7 @@ class Network:
         self.num_DIO_msg =[0]*(simulation_time)
         self.num_DAO_msg =[0]*(simulation_time)
         self.num_DIS_msg =[0]*(simulation_time)
+
 
     def start_simulation_dio(self, simulation_time):
         #set root node rank 
@@ -141,12 +160,14 @@ class Network:
         self.env.run(until=simulation_time)
         self.save_plts_as_gif("DODAG.gif", "DODAG_msg.png")
 
+
     def start_simulation_dis(self, new_node, simulation_time):
         self.setup_results(simulation_time)
         #new node sends dis message
         self.env.process(new_node.send_dis())
         self.env.run(until=simulation_time)
         self.save_plts_as_gif("Add_node_dis.gif", "Add_node_dis_msg.png")
+
 
     def start_simulation_trickle(self, simulation_time):
         self.nodes[0].rank = 0
@@ -155,7 +176,7 @@ class Network:
         self.env.process(self.nodes[0].trickle())   #start the Trickle algorithm for each node
         self.env.run(until=simulation_time)
         self.save_plts_as_gif("trickle.gif", "trickle.png")
-    #make an function that updates the DODAG i.e. the parent and children of each node, and the rank of each node, neightbors of each node
+
 
     def start_simulation_trickle_repair(self, simulation_time):
         self.nodes[0].rank = 0
@@ -163,7 +184,7 @@ class Network:
         print("--Time, node_id, I")
         self.env.process(self.nodes[0].trickle())   #start the Trickle algorithm for each node
         self.env.run(until=simulation_time)
-        print("\n\n------------------------------Rank, Parent and Routing Table after dodag ------------------------------")
+        print("\n\n------------------------------Rank, Parent and Routing Table after DODAG ------------------------------")
         for node in self.nodes:
                 print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
                 print(f"Node {node.node_id} route table: {node.routing_table}")
@@ -186,6 +207,7 @@ class Network:
 
         self.save_plts_as_gif("trickle.gif", "trickle.png")
 
+
     def start_simulation_repair(self):
         self.nodes[0].rank = 0
         self.setup_results(60)
@@ -193,13 +215,14 @@ class Network:
         self.env.process(self.nodes[0].send_dio())
         self.env.run(until=20)
 
-        print("\n\n------------------------------Rank, Parent and Routing Table after dodag ------------------------------")
+        print("\n\n------------------------------Rank, Parent and Routing Table after DODAG ------------------------------")
         for node in self.nodes:
                 print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
                 print(f"Node {node.node_id} route table: {node.routing_table}")
 
         #self.save_plts_as_gif("repair_build.gif", "repair_build.png")
         self.get_node(4).fail_node()
+        
         """
         #made example
         self.env.process(self.nodes[0].send_dio())
@@ -215,6 +238,7 @@ class Network:
         self.env.process(self.nodes[5].send_dio())
         self.env.process(self.nodes[7].send_dio())
         """ 
+        
         #seed2
         self.env.process(self.nodes[7].send_dio())
         self.env.process(self.nodes[4].send_dio())
@@ -236,6 +260,9 @@ class Network:
         self.save_plts_as_gif("repair.gif", "repair.png")
 
 
+    """
+    Visualization of the network
+    """
     def visualize(self, title, node_id_sender, node_reciver, send_msg, timestamp, msg_type):
         timestamp = int(timestamp)
         plt.figure(figsize=(self.area_size + 1, self.area_size + 1))

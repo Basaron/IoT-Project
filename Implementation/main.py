@@ -4,25 +4,28 @@ import simpy
 import random
 
 
-#make network based on random nodes 
+#-----------------TEST FUNCTIONS---------------------#
 def test_auto_configure_network(max_nodes, max_distance, area_size, auto):
+    """
+    Test autoconfigured network 
+    """
     env = simpy.rt.RealtimeEnvironment(factor=1, strict=False)
     network = Network(env)
    
+   #create network 
     network.auto_configure(max_nodes, max_distance, area_size, auto)
-    
 
-    #assert len(network.nodes) == max_nodes           #check that the number of nodes created is equal to the max number of nodes specified
-    
+
     for node in network.nodes:
         assert 0 <= node.position[0] <= area_size    #x-coordinate of node is within the expected range
         assert 0 <= node.position[1] <= area_size    #y-coordinate of node is within the expected range
 
-    #check if root node has neighbours - run test again:
+    #check if root node has neighbours - ask user to run test again:
     if len(network.nodes[0].neighbors) == 0:
         print("Root node has no neighbors. Please try again")
         exit()
 
+    #print neighbours 
     print("\n\n------------------------------Network created------------------------------")
     for node in network.nodes:
         print(f"Node {node.node_id} has position {node.position} and neighbors: {[n.node_id for n in node.neighbors]}")
@@ -30,8 +33,11 @@ def test_auto_configure_network(max_nodes, max_distance, area_size, auto):
     return network
     
 
-#make a dodag from network 
+
 def test_make_dodag(network):
+    """
+    Test if network can create DODAG
+    """
     print("\n\n------------------------------Creation of DODAG------------------------------")
     #send dio and start simulation 
     network.start_simulation_dio(10)
@@ -43,10 +49,11 @@ def test_make_dodag(network):
     
 
 
-#adding a node to the network
 def test_add_random_node(network, max_distance, area_size):
-
-    #find the node in the network with highest node id
+    """
+    Addng a random node to the network
+    """
+    #find node in the network with highest node id
     max_node = max(network.nodes, key=lambda node: node.node_id)
     
     #add node with random position
@@ -57,7 +64,7 @@ def test_add_random_node(network, max_distance, area_size):
 
     #send dis, start simulation and update neighbours 
     network.start_simulation_dis(new_node, 20)
-    #network.update_dodag(max_distance)
+    #network.update_neighbors(max_distance)
 
     print("\n\n------------------------------Neighbours after new node is added------------------------------")
 
@@ -69,8 +76,12 @@ def test_add_random_node(network, max_distance, area_size):
             print(f"Node {node.node_id} rank: {node.rank}, and parent: {node.parent.node_id if node.parent else None} ")
             print(f"Node {node.node_id} route table: {node.routing_table}")
     
-def test_trickle():
 
+
+def test_trickle():
+    """
+    Test trickle
+    """
     sim_duration = 50
     network.start_simulation_trickle(sim_duration)
 
@@ -80,8 +91,11 @@ def test_trickle():
         print(f"Node {node.node_id} route table: {node.routing_table}")
 
 
-def test_trickle_repair():
 
+def test_trickle_repair():
+    """
+    Test trickle repair
+    """
     sim_duration = 50
     network.start_simulation_trickle_repair(sim_duration)
 
@@ -92,8 +106,10 @@ def test_trickle_repair():
 
 
 
-#removing a node from the network
 def test_remove_and_repair_node(network):
+    """
+    Remove node from network and repair network
+    """
     network.start_simulation_repair()
      
 
@@ -109,21 +125,14 @@ if __name__ == "__main__":
     """
     Test case 1 - Making a simple DODAG network based on random nodes
     """
-    #make network
     network = test_auto_configure_network(n_nodes, radius, area_size, False)
-
-    #make dodag 
     #test_make_dodag(network)
 
     """
     Test case 2 - Adding a node to the network
     """
-    #add a node to the network
     #test_add_random_node(network, radius, area_size)
-
-    #make dodag
     #make_dodag(network, newNode=True)
-
 
     """
     Test case 3 - Removing a node from the network
@@ -141,7 +150,3 @@ if __name__ == "__main__":
     #test_trickle_repair()
 
 
-
-
-# add radius to the visualization 
-#update rank and parent after adding a node
