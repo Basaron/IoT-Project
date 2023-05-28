@@ -4,10 +4,7 @@ import random
 from messages import DAO_Message, DIS_Message, DIO_Message
 
 #-----------------NODE---------------------#
-msg_dio_count = 0
-msg_dao_count = 0
-msg_dis_count = 0
-trikkel_alg = False
+trickle_alg = False
 
 class Node:
     """
@@ -26,7 +23,7 @@ class Node:
         self.routing_table = []
         self.children = []
         self.send_delay = 1
-        self.node_status = True
+        self.node_alive = True
         self.I = 0
         self.is_sending_dio = False
 
@@ -66,7 +63,7 @@ class Node:
         if not self.is_sending_dio:
             self.is_sending_dio = True
             while True:
-                if self.node_status:
+                if self.node_alive:
                     #yield self.env.timeout(self.send_delay)                                 #global variable to count the number of messages sent        
                     #print(self.node_id, self.env.now)
                     for neighbor in self.neighbors:
@@ -89,7 +86,7 @@ class Node:
         
     #process dio message
     def process_dio(self, dio_msg):
-        global trikkel_alg
+        global trickle_alg
         if dio_msg.rank < self.rank:                    #rank rule in RPL: node's rank must be greater than its parent's rank 
             self.rank = dio_msg.rank                    
             self.parent = dio_msg.sender                #parent is the node that sent the dio message
@@ -97,7 +94,7 @@ class Node:
             yield self.env.timeout(self.send_delay)
             self.env.process(self.send_dao())
             yield self.env.timeout(self.send_delay)
-            if trikkel_alg:
+            if trickle_alg:
                 self.env.process(self.trickle())
             else:
                 self.env.process(self.send_dio())                             #keep sending dio messages to neighbors until no candidate parents are found
@@ -172,19 +169,18 @@ class Node:
         self.parent = None
         self.rank = float('inf')  # Initially set to infinity
         self.routing_table.clear()
-        self.node_status = False
+        self.node_alive = False
         self.I = self.network.I_min
 
-    #LOOK MORE INTO THIS 
+
     def repair_node(self):
-        self.node_status = True
-        self.rank = 10  # Increase rank to initiate local repair
+        self.node_alive = True
         self.env.process(self.send_dis())  # Broadcast updated DIO message
 
     #trickle algorithm
     def trickle(self):
-        global trikkel_alg
-        trikkel_alg = True
+        global trickle_alg
+        trickle_alg = True
         self.network.visualize(f'Node {self.node_id} started dio with trikkel', self.node_id, 0, False, self.env.now, 0)
         self.I = self.network.I_min                               #minimum interval
         t = self.I / 2 + random.uniform(0, self.I / 2)    #determine random time between I_min/2 and I_min 
