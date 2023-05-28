@@ -67,7 +67,7 @@ class Node:
                     #yield self.env.timeout(self.send_delay)                                 #global variable to count the number of messages sent        
                     #print(self.node_id, self.env.now)
                     for neighbor in self.neighbors:
-                        if neighbor.node_status:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
+                        if neighbor.node_alive:                 #message content: rank is based on distances to neighbors. increases as more nodes are added to the network
                             rank = self.rank + self.distance(neighbor)  
                             dio_msg = DIO_Message(self, rank)
                             self.network.visualize(f'Node {self.node_id} sent DIO message to {neighbor.node_id} at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now, 0)
@@ -103,7 +103,7 @@ class Node:
 
     #send dio message to specific node
     def send_dio_to(self, target_node):
-        if target_node.node_status:                               
+        if target_node.node_alive:                               
             rank = self.rank + self.distance(target_node)   #update rank
             dio_msg = DIO_Message(self, rank)
             self.network.visualize(f'Node {self.node_id} sent DIO message to {target_node.node_id}, at time {self.env.now}', self.node_id, target_node.node_id, True, self.env.now, 0)
@@ -118,7 +118,7 @@ class Node:
 
         #going through all neighbors and sending dis message to each one
         for neighbor in self.neighbors:
-            if neighbor.node_status:
+            if neighbor.node_alive:
                 self.network.visualize(f'Node {self.node_id} sent DIS message to {neighbor.node_id}, at time {self.env.now}', self.node_id, neighbor.node_id, True, self.env.now, 2)
                 neighbor.process_dis(dis_msg)
                 
@@ -187,14 +187,14 @@ class Node:
 
         #keep sending dis messages until I_max is reached: If max is reached then the least energy is used 
         while self.I <= self.network.I_max:
-            print(self.env.now, self.node_id, self.I)
+            #print(self.env.now, self.node_id, self.I)
             yield self.env.timeout(t)       #wait for t time units i.e. node is idle/listening 
             self.env.process(self.send_dio())
             if self.dio_count > self.network.k:          #node decides whether to transmit its own control message i.e DIS message if its counter is less than k (user-defined threshold)
                 self.I = self.network.I_min 
             """
             if self.parent:
-                if self.parent.node_status == False:
+                if self.parent.node_alive == False:
                     I = self.network.I_min
                     self.env.process(self.send_dio())
             """

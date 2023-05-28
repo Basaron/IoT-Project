@@ -82,7 +82,7 @@ def test_trickle(network):
     """
     Test trickle
     """
-    sim_duration = 50
+    sim_duration = 150
     network.start_simulation_trickle(sim_duration)
 
     #printing the rank and parent of each node
@@ -97,7 +97,7 @@ def test_trickle_repair(network, node_to_fail):
     Test trickle repair
     """
     sim_duration = 50
-    network.start_simulation_trickle_repair(sim_duration)
+    network.start_simulation_trickle_repair(sim_duration, node_to_fail)
 
     #printing the rank and parent of each node
     for node in network.nodes:
@@ -106,7 +106,7 @@ def test_trickle_repair(network, node_to_fail):
 
 
 
-def test_remove_and_repair_node(network,node_to_fail):
+def test_remove_and_repair_node(network, node_to_fail):
     """
     Remove node from network and repair network
     """
@@ -132,8 +132,8 @@ if __name__ == "__main__":
     """
     Test case 1 - Making a simple DODAG network based on random nodes
     """
-    network = test_auto_configure_network(n_nodes, radius, area_size, 4)
-    test_make_dodag(network)
+    network = test_auto_configure_network(n_nodes, radius, area_size, 3)
+    #test_make_dodag(network)
 
     """
     Test case 2 - Adding a node to the network
@@ -154,6 +154,6 @@ if __name__ == "__main__":
     """
     Test case 5 - test trickle repair
     """
-    #test_trickle_repair(network)
+    test_trickle_repair(network, 2)
 
 

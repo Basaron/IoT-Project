@@ -215,6 +215,8 @@ Node 9 route table: []
 50
 50
 50
+50
+52
 52
 52
 52
@@ -231,8 +233,7 @@ Node 9 route table: []
 58
 58
 58
-59
-59
+58
 60
 60
 60
@@ -240,19 +241,9 @@ Node 9 route table: []
 60
 60
 60
-60
-61
-61
-61
-62
-62
-62
-63
 64
 64
 64
-64
-65
 66
 66
 66
@@ -261,6 +252,7 @@ Node 9 route table: []
 66
 66
 66
+68
 68
 68
 68
@@ -277,6 +269,8 @@ Node 9 route table: []
 74
 74
 74
+74
+76
 76
 76
 76
@@ -293,6 +287,8 @@ Node 9 route table: []
 82
 82
 82
+82
+84
 84
 84
 84
@@ -309,6 +305,8 @@ Node 9 route table: []
 90
 90
 90
+90
+92
 92
 92
 92
@@ -318,6 +316,7 @@ Node 9 route table: []
 96
 96
 96
+98
 98
 98
 98
@@ -329,27 +328,25 @@ Node 9 route table: []
 
 ------------------------------Rank, Parent and Routing Table after node is dead------------------------------
 Node 0 rank: 0, and parent: None
-Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::6'), ('aaaa::2', 'aaaa::7'), ('aaaa::2', 'aaaa::8'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::5'), ('aaaa::3', 'aaaa::8'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::9'), ('aaaa::4', 'aaaa::6'), ('aaaa::4', 'aaaa::7')]
+Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::6'), ('aaaa::2', 'aaaa::7'), ('aaaa::2', 'aaaa::8'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::5'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::9')]
 Node 1 rank: 2.8284271247461903, and parent: 0
 Node 1 route table: []
-Node 2 rank: inf, and parent: None
-Node 2 route table: []
-Node 3 rank: 2.8284271247461903, and parent: 0
-Node 3 route table: [('aaaa::5', 'aaaa::5'), ('aaaa::8', 'aaaa::8')]
+Node 2 rank: 2.8284271247461903, and parent: 0
+Node 2 route table: [('aaaa::6', 'aaaa::6'), ('aaaa::7', 'aaaa::7'), ('aaaa::8', 'aaaa::8')]
+Node 3 rank: inf, and parent: None
+Node 3 route table: []
 Node 4 rank: 2.8284271247461903, and parent: 0
-Node 4 route table: [('aaaa::9', 'aaaa::9'), ('aaaa::6', 'aaaa::6'), ('aaaa::6', 'aaaa::7')]
-Node 5 rank: 5.06449510224598, and parent: 3
+Node 4 route table: [('aaaa::9', 'aaaa::9')]
+Node 5 rank: inf, and parent: None
 Node 5 route table: []
-Node 6 rank: 5.656854249492381, and parent: 4
-Node 6 route table: [('aaaa::7', 'aaaa::7')]
-Node 7 rank: 7.656854249492381, and parent: 6
+Node 6 rank: 5.656854249492381, and parent: 2
+Node 6 route table: []
+Node 7 rank: 4.82842712474619, and parent: 2
 Node 7 route table: []
-Node 8 rank: 5.656854249492381, and parent: 3
+Node 8 rank: 5.656854249492381, and parent: 2
 Node 8 route table: []
 Node 9 rank: 5.06449510224598, and parent: 4
 Node 9 route table: []
-100
-100
 100
 100
 100
@@ -519,26 +516,26 @@ Node 9 route table: []
 
 ------------------------------Rank, Parent and Routing Table after node repaired------------------------------
 Node 0 rank: 0, and parent: None
-Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::5'), ('aaaa::3', 'aaaa::8'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::9'), ('aaaa::4', 'aaaa::6'), ('aaaa::4', 'aaaa::7'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::7')]
+Node 0 route table: [('aaaa::1', 'aaaa::1'), ('aaaa::2', 'aaaa::2'), ('aaaa::2', 'aaaa::6'), ('aaaa::2', 'aaaa::7'), ('aaaa::2', 'aaaa::8'), ('aaaa::4', 'aaaa::4'), ('aaaa::4', 'aaaa::9'), ('aaaa::3', 'aaaa::3'), ('aaaa::3', 'aaaa::5')]
 Node 1 rank: 2.8284271247461903, and parent: 0
 Node 1 route table: []
 Node 2 rank: 2.8284271247461903, and parent: 0
-Node 2 route table: [('aaaa::7', 'aaaa::7')]
+Node 2 route table: [('aaaa::6', 'aaaa::6'), ('aaaa::7', 'aaaa::7'), ('aaaa::8', 'aaaa::8')]
 Node 3 rank: 2.8284271247461903, and parent: 0
-Node 3 route table: [('aaaa::5', 'aaaa::5'), ('aaaa::8', 'aaaa::8')]
+Node 3 route table: [('aaaa::5', 'aaaa::5')]
 Node 4 rank: 2.8284271247461903, and parent: 0
-Node 4 route table: [('aaaa::9', 'aaaa::9'), ('aaaa::6', 'aaaa::6'), ('aaaa::6', 'aaaa::7')]
+Node 4 route table: [('aaaa::9', 'aaaa::9')]
 Node 5 rank: 5.06449510224598, and parent: 3
 Node 5 route table: []
-Node 6 rank: 5.656854249492381, and parent: 4
-Node 6 route table: [('aaaa::7', 'aaaa::7')]
+Node 6 rank: 5.656854249492381, and parent: 2
+Node 6 route table: []
 Node 7 rank: 4.82842712474619, and parent: 2
 Node 7 route table: []
-Node 8 rank: 5.656854249492381, and parent: 3
+Node 8 rank: 5.656854249492381, and parent: 2
 Node 8 route table: []
 Node 9 rank: 5.06449510224598, and parent: 4
 Node 9 route table: []
-Total msg count:  436
-DIO msg count:  408
-DAO msg count:  24
-DIS msg count:  4
+Total msg count:  440
+DIO msg count:  420
+DAO msg count:  17
+DIS msg count:  3

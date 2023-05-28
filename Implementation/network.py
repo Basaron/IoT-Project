@@ -148,7 +148,6 @@ class Network:
     def start_simulation_trickle(self, simulation_time):
         self.nodes[0].rank = 0
         self.setup_results(simulation_time)
-        print("--Time, node_id, I")
         self.env.process(self.nodes[0].trickle())   #start the Trickle algorithm for each node
         self.env.run(until=simulation_time)
         self.save_plts_as_gif("trickle.gif", "trickle.png")
@@ -268,7 +267,7 @@ class Network:
         plt.close()
         
         
-        #flat_list_of_images = [item for sublist in self.images for item in sublist]
+        
         """
         #visualize the network
         imageio.mimsave(name_gif, self.images, format='GIF', duration=500, loop = 1)
